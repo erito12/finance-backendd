@@ -15,35 +15,42 @@ const swagger_1 = require("@nestjs/swagger");
 class CreateIncomeDto {
     income_date;
     income_type;
+    details;
     amount;
     account_type;
 }
 exports.CreateIncomeDto = CreateIncomeDto;
 __decorate([
     (0, swagger_1.ApiProperty)({
-        example: new Date('2025-06-04T09:45:00Z'),
-        description: 'Fecha del ingreso.',
+        description: "Fecha del ingreso.",
     }),
     __metadata("design:type", Date)
 ], CreateIncomeDto.prototype, "income_date", void 0);
 __decorate([
     (0, swagger_1.ApiProperty)({
         example: income_enums_1.TypeIncome.SB,
-        description: 'Tipo de ingreso.',
+        description: "Tipo de ingreso.",
     }),
     __metadata("design:type", String)
 ], CreateIncomeDto.prototype, "income_type", void 0);
 __decorate([
     (0, swagger_1.ApiProperty)({
+        example: "Venta de 3 sazones goya",
+        description: "Detalles del Ingreso",
+    }),
+    __metadata("design:type", String)
+], CreateIncomeDto.prototype, "details", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({
         example: 1000,
-        description: 'Monto del ingreso.',
+        description: "Monto del ingreso.",
     }),
     __metadata("design:type", Number)
 ], CreateIncomeDto.prototype, "amount", void 0);
 __decorate([
     (0, swagger_1.ApiProperty)({
-        example: 'efectivo',
-        description: 'Cuenta asociada al ingreso.',
+        example: "efectivo",
+        description: "Cuenta asociada al ingreso.",
     }),
     __metadata("design:type", String)
 ], CreateIncomeDto.prototype, "account_type", void 0);
@@ -56,8 +63,7 @@ class UpdateIncomeDto {
 exports.UpdateIncomeDto = UpdateIncomeDto;
 __decorate([
     (0, swagger_1.ApiProperty)({
-        example: new Date('2025-06-04T09:45:00Z'),
-        description: 'Fecha del ingreso.',
+        description: "Fecha del ingreso.",
         required: false,
     }),
     __metadata("design:type", Date)
@@ -65,7 +71,7 @@ __decorate([
 __decorate([
     (0, swagger_1.ApiProperty)({
         example: income_enums_1.TypeIncome.SB,
-        description: 'Tipo de ingreso.',
+        description: "Tipo de ingreso.",
         required: false,
     }),
     __metadata("design:type", String)
@@ -73,15 +79,15 @@ __decorate([
 __decorate([
     (0, swagger_1.ApiProperty)({
         example: 1000,
-        description: 'Monto del ingreso.',
+        description: "Monto del ingreso.",
         required: false,
     }),
     __metadata("design:type", Number)
 ], UpdateIncomeDto.prototype, "amount", void 0);
 __decorate([
     (0, swagger_1.ApiProperty)({
-        example: 'efectivo',
-        description: 'Cuenta asociada al ingreso.',
+        example: "efectivo",
+        description: "Cuenta asociada al ingreso.",
         required: false,
     }),
     __metadata("design:type", String)

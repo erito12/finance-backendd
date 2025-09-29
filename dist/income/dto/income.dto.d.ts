@@ -1,7 +1,8 @@
-import { AccountType, TypeIncome } from '../income.enums';
+import { AccountType, TypeIncome } from "../income.enums";
 export declare class CreateIncomeDto {
     income_date: Date;
     income_type: TypeIncome;
+    details: string;
     amount: number;
     account_type: AccountType;
 }

@@ -18,6 +18,7 @@ let Income = class Income {
     income_type;
     amount;
     account_type;
+    details;
 };
 exports.Income = Income;
 __decorate([
@@ -25,24 +26,28 @@ __decorate([
     __metadata("design:type", Number)
 ], Income.prototype, "income_id", void 0);
 __decorate([
-    (0, typeorm_1.Column)({ type: 'date', default: () => 'CURRENT_DATE' }),
+    (0, typeorm_1.Column)({ type: "date", default: () => "CURRENT_DATE" }),
     __metadata("design:type", Date)
 ], Income.prototype, "income_date", void 0);
 __decorate([
-    (0, typeorm_1.Column)({ type: 'varchar', enum: income_enums_1.TypeIncome }),
+    (0, typeorm_1.Column)({ type: "varchar", enum: income_enums_1.TypeIncome }),
     __metadata("design:type", String)
 ], Income.prototype, "income_type", void 0);
 __decorate([
-    (0, typeorm_1.Column)({ type: 'float' }),
+    (0, typeorm_1.Column)({ type: "float" }),
     __metadata("design:type", Number)
 ], Income.prototype, "amount", void 0);
 __decorate([
     (0, typeorm_1.Column)({
-        type: 'varchar',
+        type: "varchar",
         enum: income_enums_1.AccountType,
     }),
     __metadata("design:type", String)
 ], Income.prototype, "account_type", void 0);
+__decorate([
+    (0, typeorm_1.Column)({ type: "varchar" }),
+    __metadata("design:type", String)
+], Income.prototype, "details", void 0);
 exports.Income = Income = __decorate([
     (0, typeorm_1.Entity)()
 ], Income);

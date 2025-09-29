@@ -2,7 +2,8 @@ export declare enum TypeIncome {
     SB = "Salario Basico",
     PPR = "Pago por Resultado",
     VP = "Venta de Producto",
-    PG = "Cobro de Deuda"
+    CG = "Cobro de Deuda",
+    PT = "Pago Trimestral"
 }
 export declare enum AccountType {
     Cash = "efectivo",

@@ -6,7 +6,8 @@ var TypeIncome;
     TypeIncome["SB"] = "Salario Basico";
     TypeIncome["PPR"] = "Pago por Resultado";
     TypeIncome["VP"] = "Venta de Producto";
-    TypeIncome["PG"] = "Cobro de Deuda";
+    TypeIncome["CG"] = "Cobro de Deuda";
+    TypeIncome["PT"] = "Pago Trimestral";
 })(TypeIncome || (exports.TypeIncome = TypeIncome = {}));
 var AccountType;
 (function (AccountType) {
