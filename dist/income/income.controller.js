@@ -89,3 +89,4 @@ exports.IncomeController = IncomeController = __decorate([
     (0, common_1.Controller)("income"),
     __metadata("design:paramtypes", [income_service_1.IncomeService])
 ], IncomeController);
+//# sourceMappingURL=income.controller.js.map

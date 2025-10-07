@@ -48,3 +48,4 @@ __decorate([
 exports.Income = Income = __decorate([
     (0, typeorm_1.Entity)()
 ], Income);
+//# sourceMappingURL=income.entity.js.map

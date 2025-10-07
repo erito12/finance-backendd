@@ -59,3 +59,4 @@ exports.IncomeService = IncomeService = __decorate([
     __param(0, (0, typeorm_1.InjectRepository)(income_entity_1.Income)),
     __metadata("design:paramtypes", [typeorm_2.Repository])
 ], IncomeService);
+//# sourceMappingURL=income.service.js.map

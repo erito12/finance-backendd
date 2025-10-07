@@ -27,3 +27,4 @@ exports.AppModule = AppModule = __decorate([
         imports: [typeorm_1.TypeOrmModule.forRoot(typeOrmConfig), income_module_1.IncomeModule, account_module_1.AccountModule],
     })
 ], AppModule);
+//# sourceMappingURL=app.module.js.map

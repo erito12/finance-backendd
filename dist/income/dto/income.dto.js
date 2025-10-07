@@ -67,3 +67,4 @@ __decorate([
     }),
     __metadata("design:type", String)
 ], UpdateIncomeDto.prototype, "details", void 0);
+//# sourceMappingURL=income.dto.js.map

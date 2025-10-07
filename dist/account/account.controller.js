@@ -14,3 +14,4 @@ exports.AccountController = AccountController;
 exports.AccountController = AccountController = __decorate([
     (0, common_1.Controller)("account")
 ], AccountController);
+//# sourceMappingURL=account.controller.js.map

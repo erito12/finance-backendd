@@ -22,3 +22,4 @@ exports.IncomeModule = IncomeModule = __decorate([
         controllers: [income_controller_1.IncomeController],
     })
 ], IncomeModule);
+//# sourceMappingURL=income.module.js.map

@@ -49,3 +49,4 @@ __decorate([
     }),
     __metadata("design:type", Number)
 ], UpdateAccountDto.prototype, "account_amount", void 0);
+//# sourceMappingURL=account.dto.js.map
