@@ -16,7 +16,7 @@ exports.IncomeService = void 0;
 const common_1 = require("@nestjs/common");
 const typeorm_1 = require("@nestjs/typeorm");
 const typeorm_2 = require("typeorm");
-const income_entity_1 = require("./income.entity");
+const income_entity_1 = require("../entities/income.entity");
 let IncomeService = class IncomeService {
     incomeRepository;
     constructor(incomeRepository) {
@@ -25,9 +25,6 @@ let IncomeService = class IncomeService {
     async create(createIncomeDto) {
         if (!createIncomeDto.amount) {
             throw new common_1.BadRequestException("La cantidad es requerida.");
-        }
-        else if (!createIncomeDto.account_type) {
-            throw new common_1.BadRequestException("La cuenta es requerida.");
         }
         else if (!createIncomeDto.details) {
             throw new common_1.BadRequestException("Los detalles son necesarios");
@@ -62,4 +59,3 @@ exports.IncomeService = IncomeService = __decorate([
     __param(0, (0, typeorm_1.InjectRepository)(income_entity_1.Income)),
     __metadata("design:paramtypes", [typeorm_2.Repository])
 ], IncomeService);
-//# sourceMappingURL=income.service.js.map

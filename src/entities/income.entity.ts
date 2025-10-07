@@ -1,5 +1,6 @@
-import { TypeIncome } from "src/income/income.interface";
-import { Entity, Column, PrimaryGeneratedColumn } from "typeorm";
+import { TypeIncome } from "src/income/interfaces/income.interface";
+import { Entity, Column, PrimaryGeneratedColumn, ManyToOne } from "typeorm";
+import { Account } from "./account.entity";
 
 @Entity()
 export class Income {
@@ -15,11 +16,9 @@ export class Income {
   @Column({ type: "float" })
   amount: number;
 
-  @Column({
-    type: "varchar",
-  })
-  account_type: AccountType;
-
   @Column({ type: "varchar" })
   details: string;
+
+  @ManyToOne(() => Account, (account) => account.incomes)
+  account: Account;
 }

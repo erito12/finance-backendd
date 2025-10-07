@@ -1,1 +1,31 @@
-node_modules
+# Ignorar archivos de sistema
+.DS_Store
+Thumbs.db
+
+# Ignorar archivos de configuración de IDE
+.idea/
+.vscode/
+
+# Ignorar archivos temporales
+*.tmp
+*.log
+
+# Ignorar archivos de caché de TypeScript
+*.tsbuildinfo
+
+# Ignorar dependencias de Node.js
+node_modules/
+
+# Ignorar archivos JavaScript generados
+*.js
+*.js.map
+
+# Ignorar archivos de configuración de IDE
+.idea/
+.vscode/
+
+# Ignorar archivos de salida de compilación
+dist/
+build/
+out/
+.DS_Store

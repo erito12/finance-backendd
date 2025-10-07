@@ -10,12 +10,13 @@ exports.AppModule = void 0;
 const common_1 = require("@nestjs/common");
 const typeorm_1 = require("@nestjs/typeorm");
 const income_module_1 = require("./income/income.module");
-const income_entity_1 = require("./income/income.entity");
+const income_entity_1 = require("./entities/income.entity");
 const account_module_1 = require("./account/account.module");
+const account_entity_1 = require("./entities/account.entity");
 const typeOrmConfig = {
     type: "sqlite",
     database: "finance.db",
-    entities: [income_entity_1.Income],
+    entities: [income_entity_1.Income, account_entity_1.Account],
     synchronize: true,
 };
 let AppModule = class AppModule {
@@ -26,4 +27,3 @@ exports.AppModule = AppModule = __decorate([
         imports: [typeorm_1.TypeOrmModule.forRoot(typeOrmConfig), income_module_1.IncomeModule, account_module_1.AccountModule],
     })
 ], AppModule);
-//# sourceMappingURL=app.module.js.map

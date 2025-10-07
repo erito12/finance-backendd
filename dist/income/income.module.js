@@ -9,9 +9,9 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.IncomeModule = void 0;
 const common_1 = require("@nestjs/common");
 const typeorm_1 = require("@nestjs/typeorm");
-const income_entity_1 = require("./income.entity");
 const income_service_1 = require("./income.service");
 const income_controller_1 = require("./income.controller");
+const income_entity_1 = require("../entities/income.entity");
 let IncomeModule = class IncomeModule {
 };
 exports.IncomeModule = IncomeModule;
@@ -22,4 +22,3 @@ exports.IncomeModule = IncomeModule = __decorate([
         controllers: [income_controller_1.IncomeController],
     })
 ], IncomeModule);
-//# sourceMappingURL=income.module.js.map

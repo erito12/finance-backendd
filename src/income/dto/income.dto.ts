@@ -1,4 +1,4 @@
-import { AccountType, TypeIncome } from "../income.interface";
+import { TypeIncome } from "../interfaces/income.interface";
 import { ApiProperty } from "@nestjs/swagger";
 
 export class CreateIncomeDto {
@@ -8,7 +8,7 @@ export class CreateIncomeDto {
   })
   income_type: TypeIncome;
   @ApiProperty({
-    example: "Venta de 3 sazones goya",
+    example: "Pago del mes de actual",
     description: "Detalles del Ingreso",
   })
   details: string;
@@ -18,12 +18,6 @@ export class CreateIncomeDto {
     description: "Monto del ingreso.",
   })
   amount: number;
-
-  @ApiProperty({
-    example: "efectivo",
-    description: "Cuenta asociada al ingreso.",
-  })
-  account_type: AccountType;
 }
 
 export class UpdateIncomeDto {
@@ -40,11 +34,9 @@ export class UpdateIncomeDto {
     required: false,
   })
   amount?: number;
-
   @ApiProperty({
-    example: "efectivo",
-    description: "Cuenta asociada al ingreso.",
-    required: false,
+    example: "Pago del mes de actual",
+    description: "Detalles del Ingreso",
   })
-  account_type: AccountType;
+  details: string;
 }

@@ -1,8 +1,9 @@
 import { BadRequestException, Injectable } from "@nestjs/common";
 import { InjectRepository } from "@nestjs/typeorm";
 import { Repository } from "typeorm";
-import { Income } from "./income.entity";
+
 import { CreateIncomeDto, UpdateIncomeDto } from "./dto/income.dto";
+import { Income } from "src/entities/income.entity";
 
 @Injectable()
 export class IncomeService {
@@ -14,8 +15,6 @@ export class IncomeService {
   async create(createIncomeDto: CreateIncomeDto): Promise<Income> {
     if (!createIncomeDto.amount) {
       throw new BadRequestException("La cantidad es requerida.");
-    } else if (!createIncomeDto.account_type) {
-      throw new BadRequestException("La cuenta es requerida.");
     } else if (!createIncomeDto.details) {
       throw new BadRequestException("Los detalles son necesarios");
     } else if (!createIncomeDto.income_type) {

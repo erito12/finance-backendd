@@ -15,7 +15,6 @@ class CreateIncomeDto {
     income_type;
     details;
     amount;
-    account_type;
 }
 exports.CreateIncomeDto = CreateIncomeDto;
 __decorate([
@@ -27,7 +26,7 @@ __decorate([
 ], CreateIncomeDto.prototype, "income_type", void 0);
 __decorate([
     (0, swagger_1.ApiProperty)({
-        example: "Venta de 3 sazones goya",
+        example: "Pago del mes de actual",
         description: "Detalles del Ingreso",
     }),
     __metadata("design:type", String)
@@ -39,17 +38,10 @@ __decorate([
     }),
     __metadata("design:type", Number)
 ], CreateIncomeDto.prototype, "amount", void 0);
-__decorate([
-    (0, swagger_1.ApiProperty)({
-        example: "efectivo",
-        description: "Cuenta asociada al ingreso.",
-    }),
-    __metadata("design:type", String)
-], CreateIncomeDto.prototype, "account_type", void 0);
 class UpdateIncomeDto {
     income_type;
     amount;
-    account_type;
+    details;
 }
 exports.UpdateIncomeDto = UpdateIncomeDto;
 __decorate([
@@ -70,10 +62,8 @@ __decorate([
 ], UpdateIncomeDto.prototype, "amount", void 0);
 __decorate([
     (0, swagger_1.ApiProperty)({
-        example: "efectivo",
-        description: "Cuenta asociada al ingreso.",
-        required: false,
+        example: "Pago del mes de actual",
+        description: "Detalles del Ingreso",
     }),
     __metadata("design:type", String)
-], UpdateIncomeDto.prototype, "account_type", void 0);
-//# sourceMappingURL=income.dto.js.map
+], UpdateIncomeDto.prototype, "details", void 0);

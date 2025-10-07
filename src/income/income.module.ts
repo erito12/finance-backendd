@@ -1,8 +1,9 @@
 import { Module } from "@nestjs/common";
 import { TypeOrmModule } from "@nestjs/typeorm";
-import { Income } from "./income.entity";
+
 import { IncomeService } from "./income.service";
 import { IncomeController } from "./income.controller";
+import { Income } from "src/entities/income.entity";
 
 @Module({
   imports: [TypeOrmModule.forFeature([Income])],
