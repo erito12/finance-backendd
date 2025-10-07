@@ -15,7 +15,7 @@ export class IncomeService {
   ) {}
 
   async create(createIncomeDto: CreateIncomeDto): Promise<Income> {
-    const accountExists = await this.accountService.findOne(
+    const accountExists = await this.accountService.getById(
       createIncomeDto.account_id,
     );
     if (!accountExists) {
@@ -57,7 +57,7 @@ export class IncomeService {
     return this.findOne(id);
   }
 
-  async remove(id: number): Promise<void> {
+  async removeById(id: number): Promise<void> {
     if (!this.incomeRepository) {
       throw new BadRequestException("No existen datos que borrar");
     } else await this.incomeRepository.delete(id);

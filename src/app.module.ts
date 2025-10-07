@@ -5,6 +5,7 @@ import { TypeOrmModuleOptions } from "@nestjs/typeorm";
 import { Income } from "./entities/income.entity";
 import { AccountModule } from "./account/account.module";
 import { Account } from "./entities/account.entity";
+import { ExpenseModule } from './expense/expense.module';
 
 const typeOrmConfig: TypeOrmModuleOptions = {
   type: "sqlite",
@@ -14,6 +15,6 @@ const typeOrmConfig: TypeOrmModuleOptions = {
 };
 
 @Module({
-  imports: [TypeOrmModule.forRoot(typeOrmConfig), IncomeModule, AccountModule],
+  imports: [TypeOrmModule.forRoot(typeOrmConfig), IncomeModule, AccountModule, ExpenseModule],
 })
 export class AppModule {}

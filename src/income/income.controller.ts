@@ -48,12 +48,12 @@ export class IncomeController {
   }
 
   @Delete(":id")
-  async remove(@Param("id") id: number) {
+  async removeById(@Param("id") id: number) {
     const income = await this.incomeService.findOne(id);
     if (!income) {
       throw new HttpException("No existe el ingreso", HttpStatus.NOT_FOUND);
     }
-    return this.incomeService.remove(id);
+    return this.incomeService.removeById(id);
   }
 
   @Delete()
