@@ -8,11 +8,11 @@ import {
   Put,
   HttpException,
   HttpStatus,
-} from '@nestjs/common';
-import { IncomeService } from './income.service';
-import { CreateIncomeDto, UpdateIncomeDto } from './dto/income.dto';
+} from "@nestjs/common";
+import { IncomeService } from "./income.service";
+import { CreateIncomeDto, UpdateIncomeDto } from "./dto/income.dto";
 
-@Controller('income')
+@Controller("income")
 export class IncomeController {
   constructor(private readonly incomeService: IncomeService) {}
 
@@ -26,32 +26,32 @@ export class IncomeController {
     return this.incomeService.findAll();
   }
 
-  @Get(':id')
-  async findOne(@Param('id') id: number) {
+  @Get(":id")
+  async findOne(@Param("id") id: number) {
     const income = await this.incomeService.findOne(id);
     if (!income) {
-      throw new HttpException('Income not found', HttpStatus.NOT_FOUND);
+      throw new HttpException("Income not found", HttpStatus.NOT_FOUND);
     }
     return income;
   }
 
-  @Put(':id')
+  @Put(":id")
   async update(
-    @Param('id') id: number,
+    @Param("id") id: number,
     @Body() updateIncomeDto: UpdateIncomeDto,
   ) {
     const updatedIncome = await this.incomeService.update(id, updateIncomeDto);
     if (!updatedIncome) {
-      throw new HttpException('Income not found', HttpStatus.NOT_FOUND);
+      throw new HttpException("Income not found", HttpStatus.NOT_FOUND);
     }
     return updatedIncome;
   }
 
-  @Delete(':id')
-  async remove(@Param('id') id: number) {
+  @Delete(":id")
+  async remove(@Param("id") id: number) {
     const income = await this.incomeService.findOne(id);
     if (!income) {
-      throw new HttpException('Income not found', HttpStatus.NOT_FOUND);
+      throw new HttpException("Income not found", HttpStatus.NOT_FOUND);
     }
     return this.incomeService.remove(id);
   }

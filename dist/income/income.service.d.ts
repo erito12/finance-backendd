@@ -1,6 +1,6 @@
-import { Repository } from 'typeorm';
-import { Income } from './income.entity';
-import { CreateIncomeDto, UpdateIncomeDto } from './dto/income.dto';
+import { Repository } from "typeorm";
+import { Income } from "./income.entity";
+import { CreateIncomeDto, UpdateIncomeDto } from "./dto/income.dto";
 export declare class IncomeService {
     private incomeRepository;
     constructor(incomeRepository: Repository<Income>);

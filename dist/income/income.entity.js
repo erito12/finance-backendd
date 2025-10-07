@@ -11,7 +11,6 @@ var __metadata = (this && this.__metadata) || function (k, v) {
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.Income = void 0;
 const typeorm_1 = require("typeorm");
-const income_enums_1 = require("./income.enums");
 let Income = class Income {
     income_id;
     income_date;
@@ -30,7 +29,7 @@ __decorate([
     __metadata("design:type", Date)
 ], Income.prototype, "income_date", void 0);
 __decorate([
-    (0, typeorm_1.Column)({ type: "varchar", enum: income_enums_1.TypeIncome }),
+    (0, typeorm_1.Column)({ type: "varchar" }),
     __metadata("design:type", String)
 ], Income.prototype, "income_type", void 0);
 __decorate([
@@ -40,7 +39,6 @@ __decorate([
 __decorate([
     (0, typeorm_1.Column)({
         type: "varchar",
-        enum: income_enums_1.AccountType,
     }),
     __metadata("design:type", String)
 ], Income.prototype, "account_type", void 0);

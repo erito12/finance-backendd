@@ -1,14 +1,9 @@
-import { AccountType, TypeIncome } from "../income.enums";
+import { AccountType, TypeIncome } from "../income.interface";
 import { ApiProperty } from "@nestjs/swagger";
 
 export class CreateIncomeDto {
   @ApiProperty({
-    description: "Fecha del ingreso.",
-  })
-  income_date: Date;
-
-  @ApiProperty({
-    example: TypeIncome.SB,
+    example: "Pago por Resultado",
     description: "Tipo de ingreso.",
   })
   income_type: TypeIncome;
@@ -33,13 +28,7 @@ export class CreateIncomeDto {
 
 export class UpdateIncomeDto {
   @ApiProperty({
-    description: "Fecha del ingreso.",
-    required: false,
-  })
-  income_date?: Date;
-
-  @ApiProperty({
-    example: TypeIncome.SB,
+    example: "Pago por Resultado",
     description: "Tipo de ingreso.",
     required: false,
   })

@@ -23,8 +23,17 @@ let IncomeService = class IncomeService {
         this.incomeRepository = incomeRepository;
     }
     async create(createIncomeDto) {
-        if (!createIncomeDto.account_type) {
-            throw new common_1.BadRequestException('La cuenta es requerida.');
+        if (!createIncomeDto.amount) {
+            throw new common_1.BadRequestException("La cantidad es requerida.");
+        }
+        else if (!createIncomeDto.account_type) {
+            throw new common_1.BadRequestException("La cuenta es requerida.");
+        }
+        else if (!createIncomeDto.details) {
+            throw new common_1.BadRequestException("Los detalles son necesarios");
+        }
+        else if (!createIncomeDto.income_type) {
+            throw new common_1.BadRequestException("El tipo de cuenta es necesario");
         }
         const newIngreso = this.incomeRepository.create(createIncomeDto);
         return this.incomeRepository.save(newIngreso);

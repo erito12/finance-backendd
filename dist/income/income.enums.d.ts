@@ -1,12 +1,2 @@
-export declare enum TypeIncome {
-    SB = "Salario Basico",
-    PPR = "Pago por Resultado",
-    VP = "Venta de Producto",
-    CG = "Cobro de Deuda",
-    PT = "Pago Trimestral"
-}
-export declare enum AccountType {
-    Cash = "efectivo",
-    PersonalCard = "tarjeta personal",
-    SavingsCard = "tarjeta de ahorro"
-}
+export type TypeIncome = "Salario Basico" | "Pago por Resultado" | "Venta de Producto" | "Cobro de Deuda" | "Pago Trimestral";
+export type AccountType = "efectivo" | "tarjeta personal" | "tarjeta de ahorro";

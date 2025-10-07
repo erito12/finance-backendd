@@ -30,21 +30,21 @@ let IncomeController = class IncomeController {
     async findOne(id) {
         const income = await this.incomeService.findOne(id);
         if (!income) {
-            throw new common_1.HttpException('Income not found', common_1.HttpStatus.NOT_FOUND);
+            throw new common_1.HttpException("Income not found", common_1.HttpStatus.NOT_FOUND);
         }
         return income;
     }
     async update(id, updateIncomeDto) {
         const updatedIncome = await this.incomeService.update(id, updateIncomeDto);
         if (!updatedIncome) {
-            throw new common_1.HttpException('Income not found', common_1.HttpStatus.NOT_FOUND);
+            throw new common_1.HttpException("Income not found", common_1.HttpStatus.NOT_FOUND);
         }
         return updatedIncome;
     }
     async remove(id) {
         const income = await this.incomeService.findOne(id);
         if (!income) {
-            throw new common_1.HttpException('Income not found', common_1.HttpStatus.NOT_FOUND);
+            throw new common_1.HttpException("Income not found", common_1.HttpStatus.NOT_FOUND);
         }
         return this.incomeService.remove(id);
     }
@@ -64,29 +64,29 @@ __decorate([
     __metadata("design:returntype", Promise)
 ], IncomeController.prototype, "findAll", null);
 __decorate([
-    (0, common_1.Get)(':id'),
-    __param(0, (0, common_1.Param)('id')),
+    (0, common_1.Get)(":id"),
+    __param(0, (0, common_1.Param)("id")),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", [Number]),
     __metadata("design:returntype", Promise)
 ], IncomeController.prototype, "findOne", null);
 __decorate([
-    (0, common_1.Put)(':id'),
-    __param(0, (0, common_1.Param)('id')),
+    (0, common_1.Put)(":id"),
+    __param(0, (0, common_1.Param)("id")),
     __param(1, (0, common_1.Body)()),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", [Number, income_dto_1.UpdateIncomeDto]),
     __metadata("design:returntype", Promise)
 ], IncomeController.prototype, "update", null);
 __decorate([
-    (0, common_1.Delete)(':id'),
-    __param(0, (0, common_1.Param)('id')),
+    (0, common_1.Delete)(":id"),
+    __param(0, (0, common_1.Param)("id")),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", [Number]),
     __metadata("design:returntype", Promise)
 ], IncomeController.prototype, "remove", null);
 exports.IncomeController = IncomeController = __decorate([
-    (0, common_1.Controller)('income'),
+    (0, common_1.Controller)("income"),
     __metadata("design:paramtypes", [income_service_1.IncomeService])
 ], IncomeController);
 //# sourceMappingURL=income.controller.js.map

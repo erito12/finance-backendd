@@ -10,10 +10,8 @@ var __metadata = (this && this.__metadata) || function (k, v) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.UpdateIncomeDto = exports.CreateIncomeDto = void 0;
-const income_enums_1 = require("../income.enums");
 const swagger_1 = require("@nestjs/swagger");
 class CreateIncomeDto {
-    income_date;
     income_type;
     details;
     amount;
@@ -22,13 +20,7 @@ class CreateIncomeDto {
 exports.CreateIncomeDto = CreateIncomeDto;
 __decorate([
     (0, swagger_1.ApiProperty)({
-        description: "Fecha del ingreso.",
-    }),
-    __metadata("design:type", Date)
-], CreateIncomeDto.prototype, "income_date", void 0);
-__decorate([
-    (0, swagger_1.ApiProperty)({
-        example: income_enums_1.TypeIncome.SB,
+        example: "Pago por Resultado",
         description: "Tipo de ingreso.",
     }),
     __metadata("design:type", String)
@@ -55,7 +47,6 @@ __decorate([
     __metadata("design:type", String)
 ], CreateIncomeDto.prototype, "account_type", void 0);
 class UpdateIncomeDto {
-    income_date;
     income_type;
     amount;
     account_type;
@@ -63,14 +54,7 @@ class UpdateIncomeDto {
 exports.UpdateIncomeDto = UpdateIncomeDto;
 __decorate([
     (0, swagger_1.ApiProperty)({
-        description: "Fecha del ingreso.",
-        required: false,
-    }),
-    __metadata("design:type", Date)
-], UpdateIncomeDto.prototype, "income_date", void 0);
-__decorate([
-    (0, swagger_1.ApiProperty)({
-        example: income_enums_1.TypeIncome.SB,
+        example: "Pago por Resultado",
         description: "Tipo de ingreso.",
         required: false,
     }),

@@ -1,11 +1,11 @@
-import { IncomeService } from './income.service';
-import { CreateIncomeDto, UpdateIncomeDto } from './dto/income.dto';
+import { IncomeService } from "./income.service";
+import { CreateIncomeDto, UpdateIncomeDto } from "./dto/income.dto";
 export declare class IncomeController {
     private readonly incomeService;
     constructor(incomeService: IncomeService);
-    create(createIncomeDto: CreateIncomeDto): Promise<import("./income.entity").Income>;
-    findAll(): Promise<import("./income.entity").Income[]>;
-    findOne(id: number): Promise<import("./income.entity").Income>;
-    update(id: number, updateIncomeDto: UpdateIncomeDto): Promise<import("./income.entity").Income>;
+    create(createIncomeDto: CreateIncomeDto): Promise<Income>;
+    findAll(): Promise<Income[]>;
+    findOne(id: number): Promise<any>;
+    update(id: number, updateIncomeDto: UpdateIncomeDto): Promise<any>;
     remove(id: number): Promise<void>;
 }
