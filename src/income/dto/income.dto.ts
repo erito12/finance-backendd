@@ -1,3 +1,4 @@
+import { IsNotEmpty, IsNumber } from "class-validator";
 import { TypeIncome } from "../interfaces/income.interface";
 import { ApiProperty } from "@nestjs/swagger";
 
@@ -18,6 +19,14 @@ export class CreateIncomeDto {
     description: "Monto del ingreso.",
   })
   amount: number;
+
+  @IsNotEmpty()
+  @IsNumber()
+  @ApiProperty({
+    example: 1,
+    description: "Introducir el id de la cuenta",
+  })
+  account_id: number;
 }
 
 export class UpdateIncomeDto {

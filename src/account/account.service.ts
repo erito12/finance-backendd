@@ -12,14 +12,12 @@ export class AccountService {
   ) {}
 
   async create(createAccountDto: CreateAccountDto): Promise<Account> {
-    // Validación de los campos obligatorios
     if (!createAccountDto.account_type) {
       throw new BadRequestException("El tipo de cuenta es requerido.", {
         cause: new Error(),
         description: "No se está pasando el parámetro de tipo de cuenta",
       });
     }
-
     if (
       createAccountDto.account_amount === undefined ||
       createAccountDto.account_amount < 0
@@ -33,14 +31,18 @@ export class AccountService {
         },
       );
     }
-
-    // Crear una nueva cuenta
     const newAccount = this.accountRepository.create({
       account_type: createAccountDto.account_type,
       account_amount: createAccountDto.account_amount,
     });
-
-    // Guardar la nueva cuenta en la base de datos
     return this.accountRepository.save(newAccount);
+  }
+
+  async finfAll(): Promise<Account[]> {
+    return this.accountRepository.find();
+  }
+
+  async findOne(account_id: number): Promise<Account | null> {
+    return this.accountRepository.findOneBy({ account_id });
   }
 }

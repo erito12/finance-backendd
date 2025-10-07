@@ -1,12 +1,11 @@
 import { ApiProperty } from "@nestjs/swagger";
-import { AccountType } from "../interfaces/account.interface";
 
 export class CreateAccountDto {
   @ApiProperty({
     example: "tarjeta personal",
     description: "Añadir cuentas que poseas",
   })
-  account_type: AccountType;
+  account_type: string;
   @ApiProperty({
     example: "12000",
     description: "Monto inicial de la cuenta",
@@ -18,7 +17,7 @@ export class UpdateAccountDto {
     example: "tarjeta personal",
     description: "Añadir cuentas que poseas",
   })
-  account_type: AccountType;
+  account_type: string;
   @ApiProperty({
     example: "60000",
     description: "Monto inicial de la cuenta",

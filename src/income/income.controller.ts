@@ -51,8 +51,17 @@ export class IncomeController {
   async remove(@Param("id") id: number) {
     const income = await this.incomeService.findOne(id);
     if (!income) {
-      throw new HttpException("Income not found", HttpStatus.NOT_FOUND);
+      throw new HttpException("No existe el ingreso", HttpStatus.NOT_FOUND);
     }
     return this.incomeService.remove(id);
+  }
+
+  @Delete()
+  async removeAll() {
+    const account = await this.incomeService.findAll();
+    if (!account) {
+      throw new HttpException("No existe el ingreso", HttpStatus.NOT_FOUND);
+    }
+    return this.incomeService.removeAll();
   }
 }
