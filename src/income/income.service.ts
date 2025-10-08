@@ -2,9 +2,11 @@ import { BadRequestException, Injectable } from "@nestjs/common";
 import { InjectRepository } from "@nestjs/typeorm";
 import { Repository } from "typeorm";
 
-import { CreateIncomeDto, UpdateIncomeDto } from "./dto/income.dto";
+import { UpdateIncomeDto } from "./dto/income.dto";
 import { Income } from "src/entities/income.entity";
 import { AccountService } from "src/account/account.service";
+import { CreateIncomeDto } from "./dto/create-income.dto";
+import { IncomeFilterDto } from "./dto/income-filter.dto";
 
 @Injectable()
 export class IncomeService {
@@ -23,38 +25,110 @@ export class IncomeService {
         "La cuenta con el ID proporcionado no existe.",
       );
     }
-    if (!createIncomeDto.amount) {
+
+    // Validaciones
+    if (!createIncomeDto.income_amount) {
       throw new BadRequestException("La cantidad es requerida.");
-    } else if (!createIncomeDto.details) {
-      throw new BadRequestException("Los detalles son necesarios");
-    } else if (!createIncomeDto.income_type) {
-      throw new BadRequestException("El tipo de ingreso es necesario");
     }
-    const newIngreso = this.incomeRepository.create(createIncomeDto);
-    return this.incomeRepository.save(newIngreso);
+    if (!createIncomeDto.income_details) {
+      throw new BadRequestException("Los detalles son necesarios.");
+    }
+    if (!createIncomeDto.income_type) {
+      throw new BadRequestException("El tipo de ingreso es necesario.");
+    }
+
+    // Crear el ingreso
+    const newIncome = this.incomeRepository.create({
+      ...createIncomeDto,
+      account: accountExists, // Establecer la relación aquí
+    });
+    const saveIncome = await this.incomeRepository.save(newIncome);
+
+    await this.accountService.updateAccountAmount(
+      createIncomeDto.account_id,
+      createIncomeDto.income_amount,
+      false,
+    );
+
+    return this.incomeRepository.save(saveIncome);
   }
 
-  async findAll(): Promise<Income[]> {
-    return this.incomeRepository.find({ relations: ["account"] });
+  async findAll(
+    filterDto: IncomeFilterDto,
+  ): Promise<{ data: Income[]; total: number; page: number; limit: number }> {
+    const { month, account_id, page = 1, limit = 10 } = filterDto;
+
+    const queryBuilder = this.incomeRepository
+      .createQueryBuilder("income")
+      .leftJoinAndSelect("income.account", "account");
+
+    // Filtrar por mes
+    if (month) {
+      const startDate = new Date(new Date().getFullYear(), month - 1, 1); // Primer día del mes
+      const endDate = new Date(new Date().getFullYear(), month, 0); // Último día del mes
+      queryBuilder.where(
+        "income.income_date >= :startDate AND income.income_date <= :endDate",
+        {
+          startDate,
+          endDate,
+        },
+      );
+    }
+
+    //Filtrar por id
+    if (account_id) {
+      queryBuilder.andWhere("income.account_id = :account_id", { account_id });
+    }
+
+    // Contar el total de registros
+    const total = await queryBuilder.getCount();
+
+    // Aplicar paginación
+    const data = await queryBuilder
+      .skip((page - 1) * limit)
+      .take(limit)
+      .getMany();
+
+    return {
+      data,
+      total,
+      page,
+      limit,
+    };
   }
 
-  async findOne(income_id: number): Promise<Income | null> {
+  async findById(income_id: number): Promise<Income | null> {
     return this.incomeRepository.findOne({
       where: { income_id },
       relations: ["account"],
     });
   }
 
-  async update(
+  async partialUpdate(
     id: number,
     updateIncomeDto: UpdateIncomeDto,
   ): Promise<Income | null> {
-    const existingIncome = await this.findOne(id);
-    if (!existingIncome) {
-      return null;
+    const existingIncome = await this.findById(id);
+
+    if (!existingIncome) return null;
+
+    const accountId = existingIncome.account_id;
+    if (
+      updateIncomeDto.income_amount &&
+      updateIncomeDto.income_amount !== existingIncome.income_amount
+    ) {
+      const amountChange =
+        updateIncomeDto.income_amount + existingIncome.income_amount;
+
+      await this.accountService.updateAccountAmount(
+        accountId,
+        Math.abs(amountChange),
+        false,
+      );
     }
+
     await this.incomeRepository.update(id, updateIncomeDto);
-    return this.findOne(id);
+    return this.findById(id);
   }
 
   async removeById(id: number): Promise<void> {
@@ -63,7 +137,8 @@ export class IncomeService {
     } else await this.incomeRepository.delete(id);
   }
 
-  async removeAll(): Promise<void> {
-    await this.incomeRepository.deleteAll();
+  async removeAll() {
+    // Devuelve el resultado de la operación de eliminación
+    return await this.incomeRepository.delete({});
   }
 }

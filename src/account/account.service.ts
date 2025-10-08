@@ -2,7 +2,8 @@ import { BadRequestException, Injectable } from "@nestjs/common";
 import { InjectRepository } from "@nestjs/typeorm";
 import { Account } from "src/entities/account.entity";
 import { Repository } from "typeorm";
-import { CreateAccountDto, UpdateAccountDto } from "./dto/account.dto";
+import { UpdateAccountDto } from "./dto/update-account.dto";
+import { CreateAccountDto } from "./dto/create-account.dto";
 
 @Injectable()
 export class AccountService {
@@ -58,7 +59,7 @@ export class AccountService {
     return this.getById(id);
   }
 
-  async finfAll(): Promise<Account[]> {
+  async findAll(): Promise<Account[]> {
     return this.accountRepository.find();
   }
 
@@ -74,5 +75,42 @@ export class AccountService {
       throw new BadRequestException("No hay datos que borrar");
     }
     await this.accountRepository.delete(id);
+  }
+
+  //Metodos alternativos
+
+  async updateAccountAmount(
+    accountId: number,
+    amountCnage: number,
+    isExpense,
+  ): Promise<Account> {
+    const account = await this.getById(accountId);
+    if (!account) {
+      throw new BadRequestException("La cuenta no existe.");
+    }
+    //Actualizar el monto de la cuenta
+    account.account_amount += isExpense ? -amountCnage : amountCnage;
+
+    return this.accountRepository.save(account);
+  }
+
+  // //Calcular el monto total de todas las  cuentas
+  // async calculateTotalAmount(): Promise<number> {
+  //   const accounts = await this.accountRepository.find();
+  //   return accounts.reduce(
+  //     (total, account) => total + account.account_amount,
+  //     0,
+  //   );
+  // }
+
+  async calculateTotalAmount(): Promise<number> {
+    const accounts = await this.accountRepository.find();
+    if (!accounts.length) {
+      return 0; // O puedes lanzar una excepción si prefieres
+    }
+    return accounts.reduce(
+      (total, account) => total + account.account_amount,
+      0,
+    );
   }
 }

@@ -21,16 +21,17 @@ export class Income {
   income_type: TypeIncome;
 
   @Column({ type: "float" })
-  amount: number;
+  income_amount: number;
 
   @Column({ type: "varchar" })
-  details: string;
+  income_details: string;
 
+  @Column({ name: "account_id" }) // Especifica el nombre de la columna
   @IsNotEmpty()
   @IsNumber()
   account_id: number;
 
   @ManyToOne(() => Account, (account) => account.incomes)
-  @JoinColumn() // Asegúrate de que esto esté presente
+  @JoinColumn({ name: "account_id" })
   account: Account;
 }

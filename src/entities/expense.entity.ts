@@ -1,11 +1,17 @@
 import { IsNotEmpty, IsNumber } from "class-validator";
 import { expenseType } from "src/expense/interface/expense.interface";
-import { Column, Entity, JoinColumn, ManyToOne, PrimaryColumn } from "typeorm";
+import {
+  Column,
+  Entity,
+  JoinColumn,
+  ManyToOne,
+  PrimaryGeneratedColumn,
+} from "typeorm";
 import { Account } from "./account.entity";
 
 @Entity()
 export class Expense {
-  @PrimaryColumn()
+  @PrimaryGeneratedColumn()
   expense_id: number;
 
   @Column({ type: "date", default: () => "CURRENT_DATE" })
@@ -25,6 +31,6 @@ export class Expense {
   account_id: number;
 
   @ManyToOne(() => Account, (account) => account.expenses)
-  @JoinColumn({ name: "account_id" }) // Asegúrate de que esto esté presente
+  @JoinColumn()
   account: Account;
 }

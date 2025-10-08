@@ -28,7 +28,7 @@ export class ExpenseController {
 
   @Get(":id")
   async findOne(@Param("id") id: number) {
-    const expense = await this.expenseService.findOne(id);
+    const expense = await this.expenseService.findById(id);
     if (!expense) {
       throw new HttpException("Income not found", HttpStatus.NOT_FOUND);
     }
@@ -36,11 +36,11 @@ export class ExpenseController {
   }
 
   @Put(":id")
-  async update(
+  async partialUpdate(
     @Param("id") id: number,
     @Body() updateExpenseDto: UpdateExpenseDto,
   ) {
-    const updatedExpense = await this.expenseService.update(
+    const updatedExpense = await this.expenseService.partialUpdate(
       id,
       updateExpenseDto,
     );
@@ -52,7 +52,7 @@ export class ExpenseController {
 
   @Delete(":id")
   async removeById(@Param("id") id: number) {
-    const expense = await this.expenseService.findOne(id);
+    const expense = await this.expenseService.findById(id);
     if (!expense) {
       throw new HttpException("No existe el gasto", HttpStatus.NOT_FOUND);
     }
