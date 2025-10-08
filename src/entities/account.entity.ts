@@ -1,7 +1,7 @@
-import { Column, OneToMany, PrimaryGeneratedColumn } from "typeorm";
+import { Column, Entity, OneToMany, PrimaryGeneratedColumn } from "typeorm";
 import { Income } from "./income.entity";
 import { Expense } from "./expense.entity";
-
+@Entity()
 export class Account {
   @PrimaryGeneratedColumn()
   account_id: number;

@@ -1,7 +1,7 @@
-// import { IsNotEmpty, IsNumber } from "class-validator";
+import { IsNotEmpty, IsNumber } from "class-validator";
 import { expenseType } from "src/expense/interface/expense.interface";
 import { Column, Entity, JoinColumn, ManyToOne, PrimaryColumn } from "typeorm";
-// import { Account } from "./account.entity";
+import { Account } from "./account.entity";
 
 @Entity()
 export class Expense {
@@ -20,11 +20,11 @@ export class Expense {
   @Column({ type: "varchar" })
   expense_details: string;
 
-  // @IsNotEmpty()
-  // @IsNumber()
-  // account_id: number;
+  @IsNotEmpty()
+  @IsNumber()
+  account_id: number;
 
-  // @ManyToOne(() => Account, (account) => account.expenses)
-  // @JoinColumn({ name: "account_id" }) // Asegúrate de que esto esté presente
-  // account: Account;
+  @ManyToOne(() => Account, (account) => account.expenses)
+  @JoinColumn({ name: "account_id" }) // Asegúrate de que esto esté presente
+  account: Account;
 }
