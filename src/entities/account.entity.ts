@@ -1,7 +1,7 @@
-import { Column, Entity, OneToMany, PrimaryGeneratedColumn } from "typeorm";
+import { Column, OneToMany, PrimaryGeneratedColumn } from "typeorm";
 import { Income } from "./income.entity";
-// import { AccountType } from "src/account/interfaces/account.interface";
-@Entity()
+import { Expense } from "./expense.entity";
+
 export class Account {
   @PrimaryGeneratedColumn()
   account_id: number;
@@ -16,4 +16,7 @@ export class Account {
 
   @OneToMany(() => Income, (income) => income.account)
   incomes: Income[];
+
+  @OneToMany(() => Expense, (expense) => expense.account)
+  expenses: Expense[];
 }

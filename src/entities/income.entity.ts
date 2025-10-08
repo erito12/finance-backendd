@@ -1,5 +1,11 @@
 import { TypeIncome } from "src/income/interfaces/income.interface";
-import { Entity, Column, PrimaryGeneratedColumn, ManyToOne } from "typeorm";
+import {
+  Entity,
+  Column,
+  PrimaryGeneratedColumn,
+  ManyToOne,
+  JoinColumn,
+} from "typeorm";
 import { Account } from "./account.entity";
 import { IsNotEmpty, IsNumber } from "class-validator";
 
@@ -25,5 +31,6 @@ export class Income {
   account_id: number;
 
   @ManyToOne(() => Account, (account) => account.incomes)
+  @JoinColumn() // Asegúrate de que esto esté presente
   account: Account;
 }
