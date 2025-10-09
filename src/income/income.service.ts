@@ -2,7 +2,7 @@ import { BadRequestException, Injectable } from "@nestjs/common";
 import { InjectRepository } from "@nestjs/typeorm";
 import { Repository } from "typeorm";
 
-import { UpdateIncomeDto } from "./dto/income.dto";
+import { UpdateIncomeDto } from "./dto/update-income.dto";
 import { Income } from "src/entities/income.entity";
 import { AccountService } from "src/account/account.service";
 import { CreateIncomeDto } from "./dto/create-income.dto";

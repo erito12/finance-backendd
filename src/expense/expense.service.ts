@@ -4,7 +4,9 @@ import { Repository } from "typeorm";
 
 import { Expense } from "src/entities/expense.entity";
 import { AccountService } from "src/account/account.service";
-import { CreateExpenseDto, UpdateExpenseDto } from "./dto/expense.dto";
+import { UpdateExpenseDto } from "./dto/update-expense.dto";
+import { CreateExpenseDto } from "./dto/create-expense.dto";
+import { ExpenseFilterDto } from "./dto/expense-filter.dto";
 
 @Injectable()
 export class ExpenseService {
@@ -57,8 +59,44 @@ export class ExpenseService {
     return saveExpense;
   }
 
-  async findAll(): Promise<Expense[]> {
-    return this.expenseRepository.find({ relations: ["account"] });
+  async findAll(
+    filterDto: ExpenseFilterDto,
+  ): Promise<{ data: Expense[]; total: number; limit: number; page: number }> {
+    const { month, account_id, page = 1, limit = 10 } = filterDto;
+
+    const queryBuilder = this.expenseRepository
+      .createQueryBuilder("expense")
+      .leftJoinAndSelect("expense.account", "account"); // Cambiado aquí
+
+    //Filtrar por Meses
+    if (month) {
+      const startDate = new Date(new Date().getFullYear(), month - 1, 1); // Primer día del mes
+      const endDate = new Date(new Date().getFullYear(), month, 0); // Último día del mes
+
+      queryBuilder.where(
+        "expense.expense_date >= :startDate AND expense.expense_date <= :endDate",
+        {
+          startDate,
+          endDate,
+        },
+      );
+    }
+
+    //Filtrar por id
+    if (account_id) {
+      queryBuilder.andWhere("expense.account_id = :account_id", { account_id });
+    }
+
+    // Contar el total de registros
+    const total = await queryBuilder.getCount();
+
+    // Aplicar paginación
+    const data = await queryBuilder
+      .skip((page - 1) * limit)
+      .take(limit)
+      .getMany();
+
+    return { data, total, limit, page };
   }
 
   async findById(expense_id: number): Promise<Expense | null> {
@@ -101,7 +139,7 @@ export class ExpenseService {
     } else await this.expenseRepository.delete(id);
   }
 
-  async removeAll(): Promise<void> {
-    await this.expenseRepository.deleteAll();
+  async removeAll() {
+    return await this.expenseRepository.delete({});
   }
 }

@@ -26,7 +26,7 @@ export class Income {
   @Column({ type: "varchar" })
   income_details: string;
 
-  @Column({ name: "account_id" }) // Especifica el nombre de la columna
+  @Column({ name: "account_id" })
   @IsNotEmpty()
   @IsNumber()
   account_id: number;

@@ -11,7 +11,7 @@ import {
   Query,
 } from "@nestjs/common";
 import { IncomeService } from "./income.service";
-import { UpdateIncomeDto } from "./dto/income.dto";
+import { UpdateIncomeDto } from "./dto/update-income.dto";
 import { CreateIncomeDto } from "./dto/create-income.dto";
 import { Income } from "src/entities/income.entity";
 import { IncomeFilterDto } from "./dto/income-filter.dto";
@@ -26,38 +26,6 @@ export class IncomeController {
     return this.incomeService.create(createIncomeDto);
   }
 
-  // @Get()
-  // @ApiQuery({
-  //   name: "month",
-  //   required: false,
-  //   description: "Mes para filtrar ingresos",
-  // })
-  // @ApiQuery({
-  //   name: "accountId",
-  //   required: false,
-  //   description: "ID de la cuenta para filtrar ingresos",
-  // })
-  // @ApiQuery({
-  //   name: "page",
-  //   required: false,
-  //   description: "Número de página para paginación",
-  // })
-  // @ApiQuery({
-  //   name: "limit",
-  //   required: false,
-  //   description: "Número de resultados por página",
-  // })
-  // @ApiResponse({
-  //   status: 200,
-  //   description: "Lista de ingresos obtenida exitosamente",
-  //   type: [Income],
-  // })
-  // @ApiResponse({ status: 404, description: "No se encontraron ingresos" })
-  // async getIncomes(
-  //   @Query() filterDto: IncomeFilterDto,
-  // ): Promise<{ data: Income[]; total: number; page: number; limit: number }> {
-  //   return this.incomeService.findAll(filterDto);
-  // }
   @Get()
   @ApiResponse({
     status: 200,

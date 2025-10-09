@@ -8,9 +8,14 @@ import {
   Param,
   Post,
   Put,
+  Query,
 } from "@nestjs/common";
+
 import { ExpenseService } from "./expense.service";
-import { CreateExpenseDto, UpdateExpenseDto } from "./dto/expense.dto";
+import { UpdateExpenseDto } from "./dto/update-expense.dto";
+import { CreateExpenseDto } from "./dto/create-expense.dto";
+import { ExpenseFilterDto } from "./dto/expense-filter.dto";
+import { Expense } from "src/entities/expense.entity";
 
 @Controller("expense")
 export class ExpenseController {
@@ -22,8 +27,10 @@ export class ExpenseController {
   }
 
   @Get()
-  async findAll() {
-    return this.expenseService.findAll();
+  async findAllExpense(
+    @Query() filterDto: ExpenseFilterDto,
+  ): Promise<{ data: Expense[]; total: number; limit: number; page: number }> {
+    return this.expenseService.findAll(filterDto);
   }
 
   @Get(":id")
@@ -61,9 +68,12 @@ export class ExpenseController {
 
   @Delete()
   async removeAll() {
-    const account = await this.expenseService.findAll();
-    if (!account) {
-      throw new HttpException("No existe el gasto", HttpStatus.NOT_FOUND);
+    const result = await this.expenseService.removeAll();
+    if (result.affected === 0) {
+      throw new HttpException(
+        "No hay ingresos para eliminar",
+        HttpStatus.NOT_FOUND,
+      );
     }
     return this.expenseService.removeAll();
   }

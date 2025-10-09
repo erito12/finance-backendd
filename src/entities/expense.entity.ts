@@ -15,7 +15,7 @@ export class Expense {
   expense_id: number;
 
   @Column({ type: "date", default: () => "CURRENT_DATE" })
-  income_date: Date;
+  expense_date: Date;
 
   @Column({ type: "varchar" })
   expense_type: expenseType;
@@ -26,11 +26,12 @@ export class Expense {
   @Column({ type: "varchar" })
   expense_details: string;
 
+  @Column({ name: "account_id" }) // Especifica el nombre de la columna
   @IsNotEmpty()
   @IsNumber()
   account_id: number;
 
   @ManyToOne(() => Account, (account) => account.expenses)
-  @JoinColumn()
+  @JoinColumn({ name: "account_id" })
   account: Account;
 }
