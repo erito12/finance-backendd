@@ -11,4 +11,7 @@ export type TypeIncome =
   | "Pago por Resultado"
   | "Venta de Producto"
   | "Cobro de Deuda"
-  | "Pago Trimestral";
+  | "Pago Trimestral"
+  | "Pago Anual"
+  | "Indennizacion"
+  | "Licencia de Maternidad";

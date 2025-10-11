@@ -53,9 +53,15 @@ export class IncomeService {
     return this.incomeRepository.save(saveIncome);
   }
 
-  async findAll(
-    filterDto: IncomeFilterDto,
-  ): Promise<{ data: Income[]; total: number; page: number; limit: number }> {
+  async findAll(filterDto: IncomeFilterDto): Promise<{
+    data: Income[];
+
+    meta: {
+      totalItem: number;
+      page: number;
+      limit: number;
+    };
+  }> {
     const { month, account_id, page = 1, limit = 10 } = filterDto;
 
     const queryBuilder = this.incomeRepository
@@ -81,7 +87,7 @@ export class IncomeService {
     }
 
     // Contar el total de registros
-    const total = await queryBuilder.getCount();
+    const totalItem = await queryBuilder.getCount();
 
     // Aplicar paginación
     const data = await queryBuilder
@@ -92,9 +98,11 @@ export class IncomeService {
 
     return {
       data,
-      total,
-      page,
-      limit,
+      meta: {
+        totalItem,
+        page,
+        limit,
+      },
     };
   }
 

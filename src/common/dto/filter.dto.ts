@@ -9,7 +9,7 @@ export class FilterDto {
   @IsOptional()
   @IsInt()
   @IsPositive()
-  limit?: number = 1;
+  limit?: number = 10;
 
   @ApiProperty({
     required: false,
@@ -18,5 +18,5 @@ export class FilterDto {
   @IsOptional()
   @IsInt()
   @IsPositive()
-  page?: number = 10;
+  page?: number = 1;
 }
