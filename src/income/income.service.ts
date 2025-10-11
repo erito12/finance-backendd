@@ -58,11 +58,11 @@ export class IncomeService {
 
     meta: {
       totalItem: number;
-      page: number;
       limit: number;
+      page: number;
     };
   }> {
-    const { month, account_id, page = 1, limit = 10 } = filterDto;
+    const { month, account_id, limit = 10, page = 1 } = filterDto;
 
     const queryBuilder = this.incomeRepository
       .createQueryBuilder("income")
@@ -100,8 +100,8 @@ export class IncomeService {
       data,
       meta: {
         totalItem,
-        page,
         limit,
+        page,
       },
     };
   }

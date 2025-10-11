@@ -18,5 +18,5 @@ export class FilterDto {
   @IsOptional()
   @IsInt()
   @IsPositive()
-  page?: number = 1;
+  page?: number = 0;
 }

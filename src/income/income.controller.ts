@@ -35,9 +35,11 @@ export class IncomeController {
   @ApiResponse({ status: 404, description: "No se encontraron ingresos" })
   async getIncomes(@Query() filterDto: IncomeFilterDto): Promise<{
     data: Income[];
-    totalItem: number;
-    page: number;
-    limit: number;
+    meta: {
+      totalItem: number;
+      limit: number;
+      page: number;
+    };
   }> {
     return this.incomeService.findAll(filterDto);
   }
