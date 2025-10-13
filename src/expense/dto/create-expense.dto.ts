@@ -1,5 +1,5 @@
 import { ApiProperty } from "@nestjs/swagger";
-import { expenseType } from "../interface/expense.interface";
+// import { expenseType } from "../interface/expense.interface";
 import { IsNotEmpty, IsNumber } from "class-validator";
 
 export class CreateExpenseDto {
@@ -7,7 +7,7 @@ export class CreateExpenseDto {
     example: "Compra de Producto",
     description: "Tipo de Gasto.",
   })
-  expense_type: expenseType;
+  expense_type: string;
 
   @ApiProperty({
     example: "Compra de viandas en el mercado",

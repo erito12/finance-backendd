@@ -6,15 +6,16 @@ export class UpdateAccountDto {
   @ApiProperty({
     example: "tarjeta personal",
     description: "Añadir cuentas que poseas",
-    required: true,
+    required: false,
   })
-  account_type: string;
+  account_type?: string;
 
   @IsNumber()
   @IsPositive()
   @ApiProperty({
     example: "60000",
     description: "Monto inicial de la cuenta",
+    required: false,
   })
-  account_amount: number;
+  account_amount?: number;
 }

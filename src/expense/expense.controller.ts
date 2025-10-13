@@ -16,6 +16,7 @@ import { UpdateExpenseDto } from "./dto/update-expense.dto";
 import { CreateExpenseDto } from "./dto/create-expense.dto";
 import { ExpenseFilterDto } from "./dto/expense-filter.dto";
 import { Expense } from "src/entities/expense.entity";
+import { ApiResponse } from "@nestjs/swagger";
 
 @Controller("expense")
 export class ExpenseController {
@@ -27,9 +28,20 @@ export class ExpenseController {
   }
 
   @Get()
-  async findAllExpense(
-    @Query() filterDto: ExpenseFilterDto,
-  ): Promise<{ data: Expense[]; total: number; limit: number; page: number }> {
+  @ApiResponse({
+    status: 200,
+    description: "Lista de gastos obtenida exitosamente",
+    type: [Expense],
+  })
+  @ApiResponse({ status: 404, description: "No se encontraron gastos" })
+  async findAllExpense(@Query() filterDto: ExpenseFilterDto): Promise<{
+    data: Expense[];
+    meta: {
+      totalItems: number;
+      limit: number;
+      page: number;
+    };
+  }> {
     return this.expenseService.findAll(filterDto);
   }
 
@@ -68,13 +80,9 @@ export class ExpenseController {
 
   @Delete()
   async removeAll() {
-    const result = await this.expenseService.removeAll();
-    if (result.affected === 0) {
-      throw new HttpException(
-        "No hay ingresos para eliminar",
-        HttpStatus.NOT_FOUND,
-      );
-    }
-    return this.expenseService.removeAll();
+    await this.expenseService.removeAll();
+    return {
+      message: "Todos los gastos han sido eliminados exitosamente.",
+    };
   }
 }

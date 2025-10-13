@@ -12,7 +12,7 @@ export class CreateAccountDto {
   @IsPositive()
   @IsNumber()
   @ApiProperty({
-    example: "12000",
+    example: "2000",
     description: "Monto inicial de la cuenta",
     required: true,
   })

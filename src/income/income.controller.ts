@@ -36,7 +36,7 @@ export class IncomeController {
   async getIncomes(@Query() filterDto: IncomeFilterDto): Promise<{
     data: Income[];
     meta: {
-      totalItem: number;
+      totalItems: number;
       limit: number;
       page: number;
     };
@@ -76,21 +76,13 @@ export class IncomeController {
     }
     return this.incomeService.removeById(id);
   }
-
   @Delete()
   async removeAll() {
-    const result = await this.incomeService.removeAll();
+    await this.incomeService.removeAll();
 
-    // Verificar si se han eliminado ingresos
-    if (result.affected === 0) {
-      throw new HttpException(
-        "No hay ingresos para eliminar",
-        HttpStatus.NOT_FOUND,
-      );
-    }
-
+    // Como clear() no devuelve un objeto con "affected", puedes omitir esta verificación
     return {
-      message: `${result.affected} ingresos eliminados exitosamente.`,
+      message: "Todos los ingresos han sido eliminados exitosamente.",
     };
   }
 }

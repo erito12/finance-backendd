@@ -59,10 +59,15 @@ export class ExpenseService {
     return saveExpense;
   }
 
-  async findAll(
-    filterDto: ExpenseFilterDto,
-  ): Promise<{ data: Expense[]; total: number; limit: number; page: number }> {
-    const { month, account_id, page = 1, limit = 10 } = filterDto;
+  async findAll(filterDto: ExpenseFilterDto): Promise<{
+    data: Expense[];
+    meta: {
+      totalItems: number;
+      limit: number;
+      page: number;
+    };
+  }> {
+    const { month, account_id, limit = 10, page = 1 } = filterDto;
 
     const queryBuilder = this.expenseRepository
       .createQueryBuilder("expense")
@@ -88,7 +93,7 @@ export class ExpenseService {
     }
 
     // Contar el total de registros
-    const total = await queryBuilder.getCount();
+    const totalItems = await queryBuilder.getCount();
 
     // Aplicar paginación
     const data = await queryBuilder
@@ -96,7 +101,14 @@ export class ExpenseService {
       .take(limit)
       .getMany();
 
-    return { data, total, limit, page };
+    return {
+      data,
+      meta: {
+        totalItems,
+        limit,
+        page,
+      },
+    };
   }
 
   async findById(expense_id: number): Promise<Expense | null> {
@@ -134,12 +146,42 @@ export class ExpenseService {
   }
 
   async removeById(id: number): Promise<void> {
-    if (!this.expenseRepository) {
-      throw new BadRequestException("No existen datos que borrar");
-    } else await this.expenseRepository.delete(id);
+    const existingExpense = await this.findById(id);
+
+    if (!existingExpense) {
+      throw new BadRequestException("Ingreso no encontrado.");
+
+      if (!this.expenseRepository) {
+        throw new BadRequestException("No existen datos que borrar");
+      }
+    }
+    const accountId = existingExpense.account_id;
+    const expenseAmount = existingExpense.expense_amount;
+
+    //Eliminar Ingreso
+
+    await this.expenseRepository.delete(id);
+
+    await this.accountService.updateAccountAmount(
+      accountId,
+      expenseAmount,
+      false,
+    );
   }
 
   async removeAll() {
-    return await this.expenseRepository.delete({});
+    //Obtener todas los Gastos
+    const allExpense = await this.expenseRepository.find();
+    //Recorrer cada gastos y actualizar las cuentas correspondientes
+    for (const expense of allExpense) {
+      //Obtener el ID de la cuenta asociada gastos y monto
+      const accountId = expense.account_id;
+      const amount = expense.expense_amount;
+
+      //Llamar a la funcion de Actualizar el monto de la cuenta
+      await this.accountService.updateAccountAmount(accountId, amount, true);
+    }
+    // Eliminar todos los gastos
+    await this.expenseRepository.clear();
   }
 }

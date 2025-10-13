@@ -94,15 +94,6 @@ export class AccountService {
     return this.accountRepository.save(account);
   }
 
-  // //Calcular el monto total de todas las  cuentas
-  // async calculateTotalAmount(): Promise<number> {
-  //   const accounts = await this.accountRepository.find();
-  //   return accounts.reduce(
-  //     (total, account) => total + account.account_amount,
-  //     0,
-  //   );
-  // }
-
   async calculateTotalAmount(): Promise<number> {
     const accounts = await this.accountRepository.find();
     if (!accounts.length) {

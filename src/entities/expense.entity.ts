@@ -1,5 +1,5 @@
 import { IsNotEmpty, IsNumber } from "class-validator";
-import { expenseType } from "src/expense/interface/expense.interface";
+// import { expenseType } from "src/expense/interface/expense.interface";
 import {
   Column,
   Entity,
@@ -18,7 +18,7 @@ export class Expense {
   expense_date: Date;
 
   @Column({ type: "varchar" })
-  expense_type: expenseType;
+  expense_type: string;
 
   @Column({ type: "float" })
   expense_amount: number;

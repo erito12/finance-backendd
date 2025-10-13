@@ -55,9 +55,8 @@ export class IncomeService {
 
   async findAll(filterDto: IncomeFilterDto): Promise<{
     data: Income[];
-
     meta: {
-      totalItem: number;
+      totalItems: number;
       limit: number;
       page: number;
     };
@@ -87,7 +86,7 @@ export class IncomeService {
     }
 
     // Contar el total de registros
-    const totalItem = await queryBuilder.getCount();
+    const totalItems = await queryBuilder.getCount();
 
     // Aplicar paginación
     const data = await queryBuilder
@@ -99,7 +98,7 @@ export class IncomeService {
     return {
       data,
       meta: {
-        totalItem,
+        totalItems,
         limit,
         page,
       },
@@ -141,13 +140,42 @@ export class IncomeService {
   }
 
   async removeById(id: number): Promise<void> {
+    const existingIncome = await this.findById(id);
+
+    if (!existingIncome) {
+      throw new BadRequestException("Ingreso no encontrado.");
+    }
     if (!this.incomeRepository) {
       throw new BadRequestException("No existen datos que borrar");
-    } else await this.incomeRepository.delete(id);
+    }
+
+    const accountId = existingIncome.account_id;
+    const incomeAmount = existingIncome.income_amount;
+
+    //Eliminar ingreso
+    await this.incomeRepository.delete(id);
+    //Actualizar monto dela cuenta
+
+    await this.accountService.updateAccountAmount(
+      accountId,
+      incomeAmount,
+      true,
+    );
   }
 
   async removeAll() {
-    // Devuelve el resultado de la operación de eliminación
-    return await this.incomeRepository.delete({});
+    //Obtener todas los Ingresos
+    const allIncomes = await this.incomeRepository.find();
+    //Recorrer cada ingreso y actualizar las cuentas correspondientes
+    for (const income of allIncomes) {
+      //Obtener el ID de la cuenta asociada ingreso y monto
+      const accountId = income.account_id;
+      const amount = income.income_amount;
+
+      //Llamar a la funcion de Actualizar el monto de la cuenta
+      await this.accountService.updateAccountAmount(accountId, amount, true);
+    }
+    // Eliminar todos los ingresos
+    await this.incomeRepository.clear();
   }
 }
