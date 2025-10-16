@@ -66,7 +66,6 @@ export class IncomeService {
     const queryBuilder = this.incomeRepository
       .createQueryBuilder("income")
       .leftJoinAndSelect("income.account", "account");
-
     // Filtrar por mes
     if (month) {
       const startDate = new Date(new Date().getFullYear(), month - 1, 1); // Primer día del mes
@@ -79,22 +78,18 @@ export class IncomeService {
         },
       );
     }
-
     //Filtrar por id
     if (account_id) {
       queryBuilder.andWhere("income.account_id = :account_id", { account_id });
     }
-
     // Contar el total de registros
     const totalItems = await queryBuilder.getCount();
-
     // Aplicar paginación
     const data = await queryBuilder
       .skip((page - 1) * limit)
       .take(limit)
       .select(["income", "account.account_type"])
       .getMany();
-
     return {
       data,
       meta: {
@@ -121,21 +116,28 @@ export class IncomeService {
     if (!existingIncome) return null;
 
     const accountId = existingIncome.account_id;
+
+    // Verificar si hay un cambio en el monto del ingreso
     if (
-      updateIncomeDto.income_amount &&
+      updateIncomeDto.income_amount !== undefined &&
       updateIncomeDto.income_amount !== existingIncome.income_amount
     ) {
+      // Calcular la diferencia entre el nuevo monto y el existente
       const amountChange =
-        updateIncomeDto.income_amount + existingIncome.income_amount;
+        updateIncomeDto.income_amount - existingIncome.income_amount;
 
+      // Actualizar el monto de la cuenta asociada
       await this.accountService.updateAccountAmount(
         accountId,
-        Math.abs(amountChange),
-        false,
+        amountChange, // Aquí se pasa la diferencia
+        false, // false porque estamos actualizando un ingreso
       );
     }
 
+    // Actualizar el ingreso en la base de datos
     await this.incomeRepository.update(id, updateIncomeDto);
+
+    // Retornar el ingreso actualizado
     return this.findById(id);
   }
 

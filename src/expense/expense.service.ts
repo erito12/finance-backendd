@@ -131,15 +131,24 @@ export class ExpenseService {
       updateExpenseDto.expense_amount &&
       updateExpenseDto.expense_amount !== existingExpense.expense_amount
     ) {
+      // Calcular la diferencia entre el nuevo monto y el existente
       const amountChange =
         updateExpenseDto.expense_amount - existingExpense.expense_amount;
-
-      //Actualizar el monto de la cuenta
-      await this.accountService.updateAccountAmount(
-        accountId,
-        Math.abs(amountChange),
-        true,
-      );
+      if (updateExpenseDto.expense_amount > existingExpense.expense_amount) {
+        //Actualizar el monto de la cuenta
+        await this.accountService.updateAccountAmount(
+          accountId,
+          Math.abs(amountChange),
+          true,
+        );
+      } else {
+        //Actualizar el monto de la cuenta
+        await this.accountService.updateAccountAmount(
+          accountId,
+          Math.abs(amountChange),
+          false,
+        );
+      }
     }
     await this.expenseRepository.update(id, updateExpenseDto);
     return this.findById(id);
