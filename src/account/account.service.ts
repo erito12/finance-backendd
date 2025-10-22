@@ -33,11 +33,11 @@ export class AccountService {
       );
     }
     const existingAccount = await this.accountRepository.findOne({
-      where: { account_type: createAccountDto.account_type },
+      where: { account_name: createAccountDto.account_name },
     });
     if (existingAccount) {
       throw new BadRequestException(
-        "Ya existe una cuenta con el mismo tipo de cuenta.",
+        "Ya existe una cuenta con el mismo nombre de cuenta.",
         {
           cause: new Error(),
           description:

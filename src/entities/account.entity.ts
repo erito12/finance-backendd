@@ -1,6 +1,8 @@
 import { Column, Entity, OneToMany, PrimaryGeneratedColumn } from "typeorm";
 import { Income } from "./income.entity";
 import { Expense } from "./expense.entity";
+import { accountTypes } from "src/account/interfaces/account.interface";
+// import { accounType } from "src/account/interfaces/account.dto";
 @Entity()
 export class Account {
   @PrimaryGeneratedColumn()
@@ -9,7 +11,12 @@ export class Account {
   @Column({
     type: "varchar",
   })
-  account_type: string;
+  account_name: string;
+
+  @Column({
+    type: "varchar",
+  })
+  account_type: accountTypes;
 
   @Column({ type: "float" })
   account_amount: number;
