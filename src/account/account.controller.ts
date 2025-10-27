@@ -12,6 +12,7 @@ import {
 import { AccountService } from "./account.service";
 import { UpdateAccountDto } from "./dto/update-account.dto";
 import { CreateAccountDto } from "./dto/create-account.dto";
+import { accountTypes } from "./interfaces/account.interface";
 
 @Controller("account")
 export class AccountController {
@@ -30,6 +31,11 @@ export class AccountController {
   @Get("total-amount")
   async getTotalAmount(): Promise<number> {
     return this.accountService.calculateTotalAmount();
+  }
+
+  @Get("total-amount-per-account")
+  async getTotalBalancePerAccount(): Promise<Record<accountTypes, number>> {
+    return this.accountService.getBalanceByAccountType();
   }
 
   @Get(":id")

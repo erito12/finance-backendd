@@ -4,6 +4,7 @@ import { Account } from "src/entities/account.entity";
 import { Repository } from "typeorm";
 import { UpdateAccountDto } from "./dto/update-account.dto";
 import { CreateAccountDto } from "./dto/create-account.dto";
+import { accountTypes } from "./interfaces/account.interface";
 
 @Injectable()
 export class AccountService {
@@ -97,11 +98,46 @@ export class AccountService {
   async calculateTotalAmount(): Promise<number> {
     const accounts = await this.accountRepository.find();
     if (!accounts.length) {
-      return 0; // O puedes lanzar una excepción si prefieres
+      throw new BadRequestException("No hay cuentas registradas.");
     }
-    return accounts.reduce(
-      (total, account) => total + account.account_amount,
-      0,
-    );
+
+    // Objeto para almacenar las conversiones
+    const conversionRates: Record<accountTypes, number> = {
+      Efectivo: 1, // 1 Efectivo = 1 Efectivo
+      Tarjeta: 1, // Asumimos que es igual a Efectivo
+      MLC: 270, // 1 MLC = 270 Efectivo
+      USD: 450, // 1 USD = 450 Efectivo
+      USDT: 430, // 1 USDT = 430 Efectivo
+      Clasica: 400, // 1 Clasica = 400 Efectivo
+    };
+
+    // Calcular el total en Efectivo
+    return accounts.reduce((total, account) => {
+      const conversionRate = conversionRates[account.account_type];
+      const amountInEfectivo = account.account_amount * conversionRate; // Convertir a Efectivo
+      return total + amountInEfectivo; // Sumar al total
+    }, 0);
+  }
+
+  async getBalanceByAccountType(): Promise<Record<accountTypes, number>> {
+    const accounts = await this.accountRepository.find();
+    if (!accounts.length) {
+      throw new BadRequestException("No hay cuentas registradas.");
+    }
+
+    const balanceByType: Record<accountTypes, number> = {
+      Efectivo: 0,
+      Tarjeta: 0,
+      MLC: 0,
+      USD: 0,
+      USDT: 0,
+      Clasica: 0,
+    };
+
+    accounts.forEach((account) => {
+      balanceByType[account.account_type] += account.account_amount;
+    });
+
+    return balanceByType;
   }
 }
