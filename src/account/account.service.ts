@@ -105,7 +105,7 @@ export class AccountService {
     const conversionRates: Record<accountTypes, number> = {
       Efectivo: 1, // 1 Efectivo = 1 Efectivo
       Tarjeta: 1, // Asumimos que es igual a Efectivo
-      MLC: 270, // 1 MLC = 270 Efectivo
+      MLC: 200, // 1 MLC = 270 Efectivo
       USD: 450, // 1 USD = 450 Efectivo
       USDT: 430, // 1 USDT = 430 Efectivo
       Clasica: 400, // 1 Clasica = 400 Efectivo
