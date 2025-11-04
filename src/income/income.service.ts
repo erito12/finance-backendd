@@ -88,7 +88,12 @@ export class IncomeService {
     const data = await queryBuilder
       .skip((page - 1) * limit)
       .take(limit)
-      .select(["income", "account.account_type"])
+      .select([
+        "income",
+        "account.account_id",
+        "account.account_name",
+        "account.account_type",
+      ])
       .getMany();
     return {
       data,

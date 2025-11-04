@@ -1,4 +1,14 @@
-import { Module } from "@nestjs/common";
+import { PlannedExpendController } from "./planned-expend.controller";
+import { PlannedExpendService } from "./planned-expend.service";
+import { PlannedExpend } from "src/entities/planned -expend.entity";
+import { PlanningModule } from "src/planning/planning.module";
 
-@Module({})
+import { Module } from "@nestjs/common";
+import { TypeOrmModule } from "@nestjs/typeorm";
+@Module({
+  imports: [TypeOrmModule.forFeature([PlannedExpend]), PlanningModule],
+  controllers: [PlannedExpendController],
+  providers: [PlannedExpendService],
+  exports: [PlannedExpendService],
+})
 export class PlannedExpendModule {}

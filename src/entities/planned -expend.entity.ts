@@ -10,6 +10,7 @@ import {
   PrimaryGeneratedColumn,
 } from "typeorm";
 import { Planning } from "./planning.entity";
+import { IsNotEmpty, IsNumber } from "class-validator";
 
 @Entity()
 export class PlannedExpend {
@@ -23,12 +24,14 @@ export class PlannedExpend {
   amount: number;
 
   @Column({ type: "date" })
-  planned_date: Date;
+  planned_expend_date: Date;
 
   @Column({ type: "varchar" })
   priority: plannedExpendPriority;
 
   @Column({ type: "float" })
+  @IsNotEmpty()
+  @IsNumber()
   planning_id: number;
 
   @ManyToOne(() => Planning, (planning) => planning.planned_expends, {

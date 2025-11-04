@@ -31,7 +31,9 @@ export class Expense {
   @IsNumber()
   account_id: number;
 
-  @ManyToOne(() => Account, (account) => account.expenses)
+  @ManyToOne(() => Account, (account) => account.expenses, {
+    onDelete: "CASCADE",
+  })
   @JoinColumn({ name: "account_id" })
   account: Account;
 }

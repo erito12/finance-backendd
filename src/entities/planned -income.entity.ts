@@ -23,6 +23,7 @@ export class PlannedIncome {
 
   @Column({ type: "float" })
   planning_id: number;
+
   @ManyToOne(() => Planning, (planning) => planning.planned_incomes, {
     onDelete: "CASCADE",
   })

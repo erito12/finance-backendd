@@ -1,8 +1,9 @@
 import { ApiProperty } from "@nestjs/swagger";
-import { IsDate, IsNumber, IsString } from "class-validator";
+import { IsDate, IsNotEmpty, IsNumber, IsString } from "class-validator";
 
 export class CreatePlanningDto {
   @IsString()
+  @IsNotEmpty()
   @ApiProperty({
     example: "Planificación de Finanzas Personales",
     description: "Nombre de la planificación",
