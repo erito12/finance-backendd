@@ -91,7 +91,7 @@ Planificacion
 - nombre-planificacion
 - fecha-ini
 - fecha-final
-- presupuest-inicial
+- presupuest-**inicial**
 <!-- - usuarioId (FK a Usuarios) -->
 
 IngresoPlanificado

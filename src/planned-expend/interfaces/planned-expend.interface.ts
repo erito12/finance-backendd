@@ -1,4 +1,5 @@
 type plannedExpendPriority = "Alta" | "Media" | "Baja" | "Ninguna";
+
 type planendExpenseCategory =
   | "Alimentación"
   | "Personal"
@@ -6,6 +7,11 @@ type planendExpenseCategory =
   | "Bebe"
   | "Aseo"
   | "Medicamentos"
-  | "Ahorros";
+  | "Ahorros"
+  | "Hogar"
+  | "Regalos"
+  | "Educación"
+  | "Entretenimiento"
+  | "Otros";
 
 export { plannedExpendPriority, planendExpenseCategory };

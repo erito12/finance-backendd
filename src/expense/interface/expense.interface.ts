@@ -1,5 +1,14 @@
-export type expenseType =
-  | "Pago de Deuda"
-  | "Compra de Producto"
-  | "Gasto no impresindible"
-  | "Otro";
+export type expenseCategory =
+  | "Alimentación"
+  | "Personal"
+  | "Transporte"
+  | "Bebe"
+  | "Aseo"
+  | "Medicamentos"
+  | "Ahorros"
+  | "Hogar"
+  | "Regalos"
+  | "Educación"
+  | "Entretenimiento"
+  | "Otros"
+  | "";

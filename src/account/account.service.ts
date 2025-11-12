@@ -55,7 +55,11 @@ export class AccountService {
     updateAccountDto: UpdateAccountDto,
   ): Promise<Account | null> {
     const existingAccount = await this.getById(id);
-    if (!existingAccount) return null;
+    if (!existingAccount) {
+      throw new BadRequestException(
+        "No exixte la cuenta que desea actualizar.",
+      );
+    }
     await this.accountRepository.update(id, updateAccountDto);
     return this.getById(id);
   }
@@ -139,5 +143,41 @@ export class AccountService {
     });
 
     return balanceByType;
+  }
+
+  async exchangeMoney(
+    sourceAccountId: number,
+    targetAccountId: number,
+    amount: number,
+  ): Promise<{ sourceAccount: Account; targetAccount: Account }> {
+    // Validar que ambas cuentas existen
+    const sourceAccount = await this.getById(sourceAccountId);
+    const targetAccount = await this.getById(targetAccountId);
+
+    if (!sourceAccount) {
+      throw new BadRequestException("La cuenta de origen no existe.");
+    }
+    if (!targetAccount) {
+      throw new BadRequestException("La cuenta de destino no existe.");
+    }
+    // Validar que el monto es válido y que la cuenta de origen tiene suficiente saldo
+    if (amount <= 0) {
+      throw new BadRequestException("El monto debe ser un número positivo.");
+    }
+    if (sourceAccount.account_amount < amount) {
+      throw new BadRequestException(
+        "La cuenta de origen no tiene suficiente saldo.",
+      );
+    }
+
+    // Realizar la transferencia
+    sourceAccount.account_amount -= amount; // Resta el monto de la cuenta de origen
+    targetAccount.account_amount += amount; // Suma el monto a la cuenta de destino
+
+    // Guardar ambos cambios
+    await this.accountRepository.save(sourceAccount);
+    await this.accountRepository.save(targetAccount);
+
+    return { sourceAccount, targetAccount }; // Retornar las cuentas actualizadas
   }
 }

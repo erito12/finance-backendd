@@ -13,6 +13,8 @@ import { AccountService } from "./account.service";
 import { UpdateAccountDto } from "./dto/update-account.dto";
 import { CreateAccountDto } from "./dto/create-account.dto";
 import { accountTypes } from "./interfaces/account.interface";
+import { Account } from "src/entities/account.entity";
+import { ExchangeMoneyDto } from "./dto/ExchangeMoney.dto";
 
 @Controller("account")
 export class AccountController {
@@ -77,5 +79,19 @@ export class AccountController {
     }
 
     return this.accountService.removeById(id);
+  }
+
+  // Método para intercambiar dinero entre cuentas
+  @Put("exchange/:sourceAccountId/:targetAccountId")
+  async exchangeMoney(
+    @Param("sourceAccountId") sourceAccountId: number,
+    @Param("targetAccountId") targetAccountId: number,
+    @Body() exchangeMoneyDto: ExchangeMoneyDto,
+  ): Promise<{ sourceAccount: Account; targetAccount: Account }> {
+    return this.accountService.exchangeMoney(
+      sourceAccountId,
+      targetAccountId,
+      exchangeMoneyDto.amount,
+    );
   }
 }

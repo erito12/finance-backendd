@@ -1,4 +1,5 @@
 import { ApiProperty } from "@nestjs/swagger";
+import { expenseCategory } from "../interface/expense.interface";
 // import { expenseType } from "../interface/expense.interface";
 
 export class UpdateExpenseDto {
@@ -7,7 +8,7 @@ export class UpdateExpenseDto {
     description: "Tipo de Gasto.",
     required: false,
   })
-  expense_type: string;
+  expense_category: expenseCategory;
 
   @ApiProperty({
     example: 2000,

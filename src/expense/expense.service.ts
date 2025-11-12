@@ -33,7 +33,7 @@ export class ExpenseService {
     if (!createExpenseDto.expense_details) {
       throw new BadRequestException("Los detalles son necesarios");
     }
-    if (!createExpenseDto.expense_type) {
+    if (!createExpenseDto.expense_category) {
       throw new BadRequestException("El tipo de gasto es necesario");
     }
 

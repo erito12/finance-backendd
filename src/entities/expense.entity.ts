@@ -8,6 +8,7 @@ import {
   PrimaryGeneratedColumn,
 } from "typeorm";
 import { Account } from "./account.entity";
+import { expenseCategory } from "src/expense/interface/expense.interface";
 
 @Entity()
 export class Expense {
@@ -18,15 +19,14 @@ export class Expense {
   expense_date: Date;
 
   @Column({ type: "varchar" })
-  expense_type: string;
+  expense_category: expenseCategory;
 
   @Column({ type: "float" })
   expense_amount: number;
 
   @Column({ type: "varchar" })
   expense_details: string;
-
-  @Column({ name: "account_id" }) // Especifica el nombre de la columna
+  @Column({ name: "account_id" })
   @IsNotEmpty()
   @IsNumber()
   account_id: number;
