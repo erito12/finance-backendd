@@ -1,7 +1,7 @@
+import { PlannedExpend } from "../entities/planned -expend.entity";
+import { PlanningModule } from "../planning/planning.module";
 import { PlannedExpendController } from "./planned-expend.controller";
 import { PlannedExpendService } from "./planned-expend.service";
-import { PlannedExpend } from "src/entities/planned -expend.entity";
-import { PlanningModule } from "src/planning/planning.module";
 
 import { Module } from "@nestjs/common";
 import { TypeOrmModule } from "@nestjs/typeorm";

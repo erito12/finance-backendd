@@ -1,5 +1,5 @@
 import { ApiProperty } from "@nestjs/swagger";
-// import { expenseType } from "../interface/expense.interface";
+
 import { IsNotEmpty, IsNumber } from "class-validator";
 import { expenseCategory } from "../interface/expense.interface";
 

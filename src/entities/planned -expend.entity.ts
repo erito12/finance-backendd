@@ -1,8 +1,4 @@
 import {
-  planendExpenseCategory,
-  plannedExpendPriority,
-} from "src/planned-expend/interfaces/planned-expend.interface";
-import {
   Column,
   Entity,
   JoinColumn,
@@ -11,6 +7,10 @@ import {
 } from "typeorm";
 import { Planning } from "./planning.entity";
 import { IsNotEmpty, IsNumber } from "class-validator";
+import {
+  planendExpenseCategory,
+  plannedExpendPriority,
+} from "../planned-expend/interfaces/planned-expend.interface";
 
 @Entity()
 export class PlannedExpend {

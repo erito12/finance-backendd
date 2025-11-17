@@ -1,6 +1,6 @@
 import { ApiProperty } from "@nestjs/swagger";
 import { IsInt, IsOptional, IsPositive } from "class-validator";
-import { FilterDto } from "src/common/dto/filter.dto";
+import { FilterDto } from "../../common/dto/filter.dto";
 
 export class IncomeFilterDto extends FilterDto {
   @ApiProperty({

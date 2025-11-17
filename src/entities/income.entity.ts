@@ -1,4 +1,3 @@
-import { TypeIncome } from "src/income/interfaces/income.interface";
 import {
   Entity,
   Column,
@@ -8,6 +7,7 @@ import {
 } from "typeorm";
 import { Account } from "./account.entity";
 import { IsNotEmpty, IsNumber } from "class-validator";
+import { TypeIncome } from "../income/interfaces/income.interface";
 
 @Entity()
 export class Income {

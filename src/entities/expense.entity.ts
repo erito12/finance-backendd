@@ -8,7 +8,7 @@ import {
   PrimaryGeneratedColumn,
 } from "typeorm";
 import { Account } from "./account.entity";
-import { expenseCategory } from "src/expense/interface/expense.interface";
+import { expenseCategory } from "../expense/interface/expense.interface";
 
 @Entity()
 export class Expense {

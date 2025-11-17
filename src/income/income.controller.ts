@@ -13,7 +13,7 @@ import {
 import { IncomeService } from "./income.service";
 import { UpdateIncomeDto } from "./dto/update-income.dto";
 import { CreateIncomeDto } from "./dto/create-income.dto";
-import { Income } from "src/entities/income.entity";
+import { Income } from "../entities/income.entity";
 import { IncomeFilterDto } from "./dto/income-filter.dto";
 import { ApiResponse } from "@nestjs/swagger";
 

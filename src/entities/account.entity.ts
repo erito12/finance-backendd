@@ -1,8 +1,8 @@
 import { Column, Entity, OneToMany, PrimaryGeneratedColumn } from "typeorm";
 import { Income } from "./income.entity";
 import { Expense } from "./expense.entity";
-import { accountTypes } from "src/account/interfaces/account.interface";
-// import { accounType } from "src/account/interfaces/account.dto";
+import { accountTypes } from "../account/interfaces/account.interface";
+
 @Entity()
 export class Account {
   @PrimaryGeneratedColumn()

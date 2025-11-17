@@ -15,7 +15,7 @@ import { ExpenseService } from "./expense.service";
 import { UpdateExpenseDto } from "./dto/update-expense.dto";
 import { CreateExpenseDto } from "./dto/create-expense.dto";
 import { ExpenseFilterDto } from "./dto/expense-filter.dto";
-import { Expense } from "src/entities/expense.entity";
+import { Expense } from "../entities/expense.entity";
 import { ApiResponse } from "@nestjs/swagger";
 
 @Controller("expense")

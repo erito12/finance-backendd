@@ -13,7 +13,7 @@ import { AccountService } from "./account.service";
 import { UpdateAccountDto } from "./dto/update-account.dto";
 import { CreateAccountDto } from "./dto/create-account.dto";
 import { accountTypes } from "./interfaces/account.interface";
-import { Account } from "src/entities/account.entity";
+import { Account } from "../entities/account.entity";
 import { ExchangeMoneyDto } from "./dto/ExchangeMoney.dto";
 
 @Controller("account")
