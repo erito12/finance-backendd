@@ -17,7 +17,6 @@ export class ExpenseService {
   ) {}
 
   async create(createExpenseDto: CreateExpenseDto): Promise<Expense> {
-    //Comparando si la cuenta existe
     const accountExists = await this.accountService.getById(
       createExpenseDto.account_id,
     );

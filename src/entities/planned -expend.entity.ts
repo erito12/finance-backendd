@@ -8,7 +8,7 @@ import {
 import { Planning } from "./planning.entity";
 import { IsNotEmpty, IsNumber } from "class-validator";
 import {
-  planendExpenseCategory,
+  plannedExpenseCategory,
   plannedExpendPriority,
 } from "../planned-expend/interfaces/planned-expend.interface";
 
@@ -18,16 +18,19 @@ export class PlannedExpend {
   planned_expend_id: number;
 
   @Column({ type: "varchar" })
-  category: planendExpenseCategory;
+  category: plannedExpenseCategory;
 
   @Column({ type: "float" })
   amount: number;
 
-  @Column({ type: "date" })
-  planned_expend_date: Date;
-
   @Column({ type: "varchar" })
   priority: plannedExpendPriority;
+
+  @Column({ type: "varchar" })
+  description: string;
+
+  @Column({ type: "varchar" })
+  product_name?: string;
 
   @Column({ type: "float" })
   @IsNotEmpty()

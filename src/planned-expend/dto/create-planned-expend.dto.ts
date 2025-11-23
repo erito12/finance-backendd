@@ -1,7 +1,7 @@
 import { ApiProperty } from "@nestjs/swagger";
-import { IsDate, IsNotEmpty, IsNumber, IsString } from "class-validator";
+import { IsNotEmpty, IsNumber, IsString } from "class-validator";
 import {
-  planendExpenseCategory,
+  plannedExpenseCategory,
   plannedExpendPriority,
 } from "../interfaces/planned-expend.interface";
 
@@ -22,16 +22,7 @@ export class createPlannedExpendDto {
     description: "Categoria del gasto planificado",
     required: true,
   })
-  categoty: planendExpenseCategory;
-
-  @IsNotEmpty()
-  @IsNumber()
-  @ApiProperty({
-    example: 500,
-    description: "Monto del gasto planificado",
-    required: true,
-  })
-  amount: number;
+  categoty: plannedExpenseCategory;
 
   @IsString()
   @IsNotEmpty()
@@ -42,11 +33,6 @@ export class createPlannedExpendDto {
   })
   priority: plannedExpendPriority;
 
-  @IsDate()
-  @IsNotEmpty()
-  @ApiProperty({ example: "2025-11-19" })
-  planned_expend_date: Date;
-
   @IsNumber()
   @IsNotEmpty()
   @ApiProperty({
@@ -55,4 +41,28 @@ export class createPlannedExpendDto {
     required: true,
   })
   planning_id: number;
+
+  @IsString()
+  @IsNotEmpty()
+  @ApiProperty({
+    example: "Pago de 4 libras de boniato",
+    description: "Se describe el gasto",
+  })
+  description: string;
+
+  @IsString()
+  @ApiProperty({
+    example: "Boniato",
+    description: "Nombre del producto del gasto",
+  })
+  product_name?: string;
+
+  @IsNotEmpty()
+  @IsNumber()
+  @ApiProperty({
+    example: 500,
+    description: "Monto del gasto planificado",
+    required: true,
+  })
+  amount: number;
 }

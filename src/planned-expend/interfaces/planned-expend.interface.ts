@@ -1,17 +1,22 @@
-type plannedExpendPriority = "Alta" | "Media" | "Baja" | "Ninguna";
+type plannedExpendPriority =
+  | "Essential"
+  | "Very Necessary"
+  | "Necessary"
+  | "Dispensable"
+  | "None";
 
-type planendExpenseCategory =
-  | "Alimentación"
+type plannedExpenseCategory =
+  | "Food"
   | "Personal"
-  | "Transporte"
-  | "Bebe"
-  | "Aseo"
-  | "Medicamentos"
-  | "Ahorros"
-  | "Hogar"
-  | "Regalos"
-  | "Educación"
-  | "Entretenimiento"
-  | "Otros";
+  | "Transportation"
+  | "Baby"
+  | "Hygiene"
+  | "Medication"
+  | "Savings"
+  | "Home"
+  | "Gifts"
+  | "Education"
+  | "Entertainment"
+  | "Other";
 
-export { plannedExpendPriority, planendExpenseCategory };
+export { plannedExpendPriority, plannedExpenseCategory };

@@ -48,6 +48,12 @@ export class AccountController {
     }
     return account;
   }
+
+  @Get(":id/balance")
+  async getBalance(@Param("id") id: number) {
+    return this.accountService.getAccountBalance(id);
+  }
+
   @Put(":id")
   async updateById(
     @Param("id") id: number,
