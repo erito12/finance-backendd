@@ -7,7 +7,7 @@ import {
 } from "typeorm";
 import { Account } from "./account.entity";
 import { IsNotEmpty, IsNumber } from "class-validator";
-import { TypeIncome } from "../income/interfaces/income.interface";
+import { IncomeType } from "../income/interfaces/income.interface";
 
 @Entity()
 export class Income {
@@ -18,7 +18,7 @@ export class Income {
   income_date: Date;
 
   @Column({ type: "varchar" })
-  income_type: TypeIncome;
+  income_type: IncomeType;
 
   @Column({ type: "float" })
   income_amount: number;

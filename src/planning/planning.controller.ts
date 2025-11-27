@@ -30,9 +30,32 @@ export class PlanningController {
     const planning = await this.planningService.getById(id);
 
     if (!planning) {
-      throw new HttpException("Cuenta no encontrada", HttpStatus.NOT_FOUND);
+      throw new HttpException(
+        "Planificacion no encontrada",
+        HttpStatus.NOT_FOUND,
+      );
     }
     return planning;
+  }
+
+  @Get(":planning_name")
+  async getIdByName(@Param("planning_name") planning_name: string) {
+    if (!planning_name) {
+      throw new HttpException(
+        "El nombre de la planificación es requerido",
+        HttpStatus.BAD_REQUEST,
+      );
+    }
+    const findPlanningId =
+      await this.planningService.getIdByName(planning_name);
+    console.log("first", findPlanningId);
+    if (!findPlanningId) {
+      throw new HttpException(
+        "Planificacion no encontrada",
+        HttpStatus.NOT_FOUND,
+      );
+    }
+    return findPlanningId;
   }
 
   @Put(":id")

@@ -11,14 +11,15 @@ import { Expense } from "./entities/expense.entity";
 import { PlanningModule } from "./planning/planning.module";
 import { Planning } from "./entities/planning.entity";
 import { PlannedExpendModule } from "./planned-expend/planned-expend.module";
-import { PlannedIncomeModule } from "./planned-income/planned-income.module";
-import { PlannedExpend } from "./entities/planned -expend.entity";
-import { PlannedIncome } from "./entities/planned -income.entity";
+import { PlannedExpend } from "./entities/planning-expend.entity";
+import { IncomePlanning } from "./entities/planning-income.entity";
+import { PlanningIncomeModule } from "./planning-income/planning-income.module";
+import { PlanningIncomeController } from "./planning-income/planning-income.controller";
 
 const typeOrmConfig: TypeOrmModuleOptions = {
   type: "sqlite",
   database: "finance.db",
-  entities: [Income, Account, Expense, Planning, PlannedExpend, PlannedIncome],
+  entities: [Income, Account, Expense, Planning, PlannedExpend, IncomePlanning],
   synchronize: true,
 };
 
@@ -30,7 +31,9 @@ const typeOrmConfig: TypeOrmModuleOptions = {
     ExpenseModule,
     PlanningModule,
     PlannedExpendModule,
-    PlannedIncomeModule,
+    IncomePlanning,
+    PlanningIncomeModule,
   ],
+  controllers: [PlanningIncomeController],
 })
 export class AppModule {}

@@ -1,5 +1,5 @@
 import { Column, Entity, OneToMany, PrimaryGeneratedColumn } from "typeorm";
-import { PlannedExpend } from "./planned -expend.entity";
+import { PlannedExpend } from "./planning-expend.entity";
 
 @Entity()
 export class Planning {

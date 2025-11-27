@@ -1,4 +1,4 @@
-import { PlannedExpend } from "../entities/planned -expend.entity";
+import { PlannedExpend } from "../entities/planning-expend.entity";
 import { PlanningModule } from "../planning/planning.module";
 import { PlannedExpendController } from "./planned-expend.controller";
 import { PlannedExpendService } from "./planned-expend.service";

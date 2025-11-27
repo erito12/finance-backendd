@@ -41,7 +41,7 @@ export class IncomeService {
     // Crear el ingreso
     const newIncome = this.incomeRepository.create({
       ...createIncomeDto,
-      account: accountExists, // Establecer la relación aquí
+      account: accountExists,
     });
     const saveIncome = await this.incomeRepository.save(newIncome);
 

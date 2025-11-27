@@ -54,19 +54,27 @@ export class PlanningService {
   async getById(planning_id: number): Promise<Planning | null> {
     return this.planningRepository.findOneBy({ planning_id });
   }
+
+  async getIdByName(planning_name: string): Promise<Planning | null> {
+    const normalizedPlanningName = planning_name.trim().toLowerCase(); // Eliminar espacios y convertir a minúsculas
+    return this.planningRepository.findOneBy({
+      planning_name: normalizedPlanningName,
+    });
+  }
+
   async getAll(): Promise<Planning[]> {
     return this.planningRepository.find();
   }
 
   async partialUpdate(
     id: number,
-    UpdatePlanningDto: UpdatePlanningDto,
+    updatePlanningDto: UpdatePlanningDto,
   ): Promise<Planning | null> {
     const existingPlanning = await this.getById(id);
     if (!existingPlanning) {
       throw new BadRequestException("No existe la cuenta a actualizar");
     }
-    await this.planningRepository.update(id, UpdatePlanningDto);
+    await this.planningRepository.update(id, updatePlanningDto);
     return this.getById(id);
   }
 
@@ -88,4 +96,6 @@ export class PlanningService {
     }
     await this.planningRepository.delete(id);
   }
+
+  //Metodos Complementarios
 }

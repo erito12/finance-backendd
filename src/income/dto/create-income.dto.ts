@@ -1,5 +1,5 @@
 import { ApiProperty } from "@nestjs/swagger";
-import { TypeIncome } from "../interfaces/income.interface";
+import { IncomeType } from "../interfaces/income.interface";
 import { IsNotEmpty, IsNumber } from "class-validator";
 
 export class CreateIncomeDto {
@@ -7,7 +7,7 @@ export class CreateIncomeDto {
     example: "Pago por Resultado",
     description: "Tipo de ingreso.",
   })
-  income_type: TypeIncome;
+  income_type: IncomeType;
   @ApiProperty({
     example: "Pago del mes de actual",
     description: "Detalles del Ingreso",

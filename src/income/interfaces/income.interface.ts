@@ -1,12 +1,12 @@
 export interface incomeInterface {
   income_id: string;
-  income_type: TypeIncome;
+  income_type: IncomeType;
   details: string;
   amount: number;
   income_date: Date;
 }
 
-export type TypeIncome =
+export type IncomeType =
   | "Salario Basico"
   | "Pago por Resultado"
   | "Venta de Producto"
@@ -14,4 +14,5 @@ export type TypeIncome =
   | "Pago Trimestral"
   | "Pago Anual"
   | "Indennizacion"
-  | "Licencia de Maternidad";
+  | "Licencia de Maternidad"
+  | "Otro";

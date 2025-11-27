@@ -6,20 +6,18 @@ import {
   PrimaryGeneratedColumn,
 } from "typeorm";
 import { Planning } from "./planning.entity";
+import { IncomeType } from "../income/interfaces/income.interface";
 
 @Entity()
-export class PlannedIncome {
+export class IncomePlanning {
   @PrimaryGeneratedColumn()
-  planned_income_id: number;
+  income_planning_id: number;
 
   @Column({ type: "varchar" })
-  title_income: string;
+  income_planning_type: IncomeType;
 
   @Column({ type: "float" })
-  amount_income: number;
-
-  @Column({ type: "date" })
-  planned_date_income: Date;
+  income_planning_amount: number;
 
   @Column({ type: "float" })
   planning_id: number;
