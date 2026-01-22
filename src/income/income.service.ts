@@ -106,7 +106,7 @@ export class IncomeService {
     };
   }
 
-  async findById(income_id: number): Promise<Income | null> {
+  async getById(income_id: number): Promise<Income | null> {
     return this.incomeRepository.findOne({
       where: { income_id },
       relations: ["account"],
@@ -117,7 +117,7 @@ export class IncomeService {
     id: number,
     updateIncomeDto: UpdateIncomeDto,
   ): Promise<Income | null> {
-    const existingIncome = await this.findById(id);
+    const existingIncome = await this.getById(id);
 
     if (!existingIncome) return null;
 
@@ -144,17 +144,14 @@ export class IncomeService {
     await this.incomeRepository.update(id, updateIncomeDto);
 
     // Retornar el ingreso actualizado
-    return this.findById(id);
+    return this.getById(id);
   }
 
   async removeById(id: number): Promise<void> {
-    const existingIncome = await this.findById(id);
+    const existingIncome = await this.getById(id);
 
     if (!existingIncome) {
       throw new BadRequestException("Ingreso no encontrado.");
-    }
-    if (!this.incomeRepository) {
-      throw new BadRequestException("No existen datos que borrar");
     }
 
     const accountId = existingIncome.account_id;

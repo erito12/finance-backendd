@@ -19,12 +19,16 @@ export class PlanningController {
   constructor(private readonly planningService: PlanningService) {}
   @Post()
   async create(@Body() createPlanningDto: CreatePlanningDto) {
-    return this.planningService.create(createPlanningDto);
+    const result = await this.planningService.create(createPlanningDto);
+
+    return { id: result.id, plannin: result.planning };
   }
+
   @Get()
   async findAll() {
     return this.planningService.getAll();
   }
+
   @Get(":id")
   async getById(@Param("id") id: number) {
     const planning = await this.planningService.getById(id);
@@ -36,26 +40,6 @@ export class PlanningController {
       );
     }
     return planning;
-  }
-
-  @Get(":planning_name")
-  async getIdByName(@Param("planning_name") planning_name: string) {
-    if (!planning_name) {
-      throw new HttpException(
-        "El nombre de la planificación es requerido",
-        HttpStatus.BAD_REQUEST,
-      );
-    }
-    const findPlanningId =
-      await this.planningService.getIdByName(planning_name);
-    console.log("first", findPlanningId);
-    if (!findPlanningId) {
-      throw new HttpException(
-        "Planificacion no encontrada",
-        HttpStatus.NOT_FOUND,
-      );
-    }
-    return findPlanningId;
   }
 
   @Put(":id")

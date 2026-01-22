@@ -13,8 +13,7 @@ import { Planning } from "./entities/planning.entity";
 import { PlannedExpendModule } from "./planned-expend/planned-expend.module";
 import { PlannedExpend } from "./entities/planning-expend.entity";
 import { IncomePlanning } from "./entities/planning-income.entity";
-import { PlanningIncomeModule } from "./planning-income/planning-income.module";
-import { PlanningIncomeController } from "./planning-income/planning-income.controller";
+import { IncomePlaningModule } from "./planning-income/planning-income.module";
 
 const typeOrmConfig: TypeOrmModuleOptions = {
   type: "sqlite",
@@ -31,9 +30,7 @@ const typeOrmConfig: TypeOrmModuleOptions = {
     ExpenseModule,
     PlanningModule,
     PlannedExpendModule,
-    IncomePlanning,
-    PlanningIncomeModule,
+    IncomePlaningModule,
   ],
-  controllers: [PlanningIncomeController],
 })
 export class AppModule {}

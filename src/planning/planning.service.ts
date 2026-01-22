@@ -13,7 +13,9 @@ export class PlanningService {
     private planningRepository: Repository<Planning>,
   ) {}
 
-  async create(createPlanningDto: CreatePlanningDto): Promise<Planning> {
+  async create(
+    createPlanningDto: CreatePlanningDto,
+  ): Promise<{ id: number; planning: Planning }> {
     if (!createPlanningDto.planning_name) {
       throw new BadRequestException(
         "El nombre de la planificación es requerido.",
@@ -48,18 +50,14 @@ export class PlanningService {
       );
     }
     const newPlanning = this.planningRepository.create(createPlanningDto);
-    return this.planningRepository.save(newPlanning);
+    const savedPlanning = await this.planningRepository.save(newPlanning);
+
+    // Devolver el ID y el objeto de planificación
+    return { id: savedPlanning.planning_id, planning: savedPlanning };
   }
 
   async getById(planning_id: number): Promise<Planning | null> {
     return this.planningRepository.findOneBy({ planning_id });
-  }
-
-  async getIdByName(planning_name: string): Promise<Planning | null> {
-    const normalizedPlanningName = planning_name.trim().toLowerCase(); // Eliminar espacios y convertir a minúsculas
-    return this.planningRepository.findOneBy({
-      planning_name: normalizedPlanningName,
-    });
   }
 
   async getAll(): Promise<Planning[]> {

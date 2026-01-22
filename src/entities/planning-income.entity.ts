@@ -16,6 +16,9 @@ export class IncomePlanning {
   @Column({ type: "varchar" })
   income_planning_type: IncomeType;
 
+  @Column({ type: "varchar" })
+  income_planning_details: string;
+
   @Column({ type: "float" })
   income_planning_amount: number;
 

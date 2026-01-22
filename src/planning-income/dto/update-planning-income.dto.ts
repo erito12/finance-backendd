@@ -2,12 +2,12 @@ import { ApiProperty } from "@nestjs/swagger";
 import { IsNumber, IsPositive, IsString } from "class-validator";
 import { IncomeType } from "../../income/interfaces/income.interface";
 
-export class UpdatePlanningIncomeDto {
+export class UpdateIncomePlanningDto {
   @IsString()
   @ApiProperty({
     example: "Vianda",
     description: "Nombre del gasto planificaqado",
-    required: true,
+    required: false,
   })
   title_income: string;
 
@@ -16,7 +16,7 @@ export class UpdatePlanningIncomeDto {
   @ApiProperty({
     example: 1000,
     description: "Monto del ingreso Planificado",
-    required: true,
+    required: false,
   })
   income_type: IncomeType;
 
@@ -25,7 +25,7 @@ export class UpdatePlanningIncomeDto {
   @ApiProperty({
     example: 1,
     description: "Id de la planificacion asociada",
-    required: true,
+    required: false,
   })
   planning_id: number;
 }

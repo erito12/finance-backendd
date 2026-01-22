@@ -46,7 +46,7 @@ export class IncomeController {
 
   @Get(":id")
   async findOne(@Param("id") id: number) {
-    const income = await this.incomeService.findById(id);
+    const income = await this.incomeService.getById(id);
     if (!income) {
       throw new HttpException("Income not found", HttpStatus.NOT_FOUND);
     }
@@ -70,7 +70,7 @@ export class IncomeController {
 
   @Delete(":id")
   async removeById(@Param("id") id: number) {
-    const income = await this.incomeService.findById(id);
+    const income = await this.incomeService.getById(id);
     if (!income) {
       throw new HttpException("No existe el ingreso", HttpStatus.NOT_FOUND);
     }

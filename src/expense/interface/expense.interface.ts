@@ -10,5 +10,6 @@ export type expenseCategory =
   | "Regalos"
   | "Educación"
   | "Entretenimiento"
+  | "PG"
   | "Otros"
   | "";

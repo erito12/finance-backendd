@@ -3,10 +3,10 @@ import { InjectRepository } from "@nestjs/typeorm";
 import { IncomePlanning } from "../entities/planning-income.entity";
 import { Repository } from "typeorm";
 import { PlanningService } from "../planning/planning.service";
-import { CreatePlanningIncomeDto } from "./dto/create-planning-income.dto";
+import { CreateIncomePlanning } from "./dto/create-planning-income.dto";
 
 @Injectable()
-export class PlanningIncomeService {
+export class IncomePlanningService {
   constructor(
     @InjectRepository(IncomePlanning)
     private planningIncomeRepository: Repository<IncomePlanning>,
@@ -14,28 +14,11 @@ export class PlanningIncomeService {
   ) {}
 
   async create(
-    createPlanningIncomeDto: CreatePlanningIncomeDto,
+    createPlanningIncomeDto: CreateIncomePlanning,
   ): Promise<IncomePlanning> {
     const existingPlanning = await this.planningService.getById(
       createPlanningIncomeDto.planning_id,
     );
-    const existNameIncomePlanning = await this.planningIncomeRepository.findOne(
-      {
-        where: {
-          income_planning_type: createPlanningIncomeDto.income_planning_type,
-        },
-      },
-    );
-    if (existNameIncomePlanning) {
-      throw new BadRequestException(
-        "Ya existe una planificación de ingreso con el mismo nombre.",
-        {
-          cause: new Error(),
-          description:
-            "No se puede crear una nueva planificación de ingreso con un nombre existente",
-        },
-      );
-    }
 
     if (!existingPlanning) {
       throw new BadRequestException(
@@ -74,5 +57,27 @@ export class PlanningIncomeService {
 
   async getAll(): Promise<IncomePlanning[]> {
     return this.planningIncomeRepository.find();
+  }
+
+  async removeAll(): Promise<void> {
+    const count = await this.planningIncomeRepository.count();
+    if (count === 0) {
+      throw new BadRequestException("No hay datos que borrar ");
+    }
+    await this.planningIncomeRepository.clear();
+  }
+
+  async removeById(id: number): Promise<void> {
+    const existIncomePlanning = await this.getById(id);
+    const count = await this.planningIncomeRepository.count();
+
+    if (!existIncomePlanning) {
+      throw new BadRequestException("Planificacion de ingreso no encontrada ");
+    }
+    if (count === 0) {
+      throw new BadRequestException("No hay datos que borrar ");
+    }
+
+    await this.planningIncomeRepository.delete(id);
   }
 }
