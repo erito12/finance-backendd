@@ -5,7 +5,7 @@ import {
   plannedExpendPriority,
 } from "../interfaces/planned-expend.interface";
 
-export class createPlannedExpendDto {
+export class CreateExpensePlanningDto {
   @IsString()
   @IsNotEmpty()
   @ApiProperty({
@@ -22,7 +22,7 @@ export class createPlannedExpendDto {
     description: "Categoria del gasto planificado",
     required: true,
   })
-  categoty: plannedExpenseCategory;
+  category: plannedExpenseCategory;
 
   @IsString()
   @IsNotEmpty()

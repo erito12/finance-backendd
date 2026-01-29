@@ -1,21 +1,21 @@
 import { BadRequestException, Injectable } from "@nestjs/common";
 import { InjectRepository } from "@nestjs/typeorm";
-import { IncomePlanning } from "../entities/planning-income.entity";
+import { PlannedIncome } from "../entities/income-planning.entity";
 import { Repository } from "typeorm";
 import { PlanningService } from "../planning/planning.service";
-import { CreateIncomePlanning } from "./dto/create-planning-income.dto";
+import { CreateIncomePlanningDto } from "./dto/create-planning-income.dto";
 
 @Injectable()
 export class IncomePlanningService {
   constructor(
-    @InjectRepository(IncomePlanning)
-    private planningIncomeRepository: Repository<IncomePlanning>,
+    @InjectRepository(PlannedIncome)
+    private planningIncomeRepository: Repository<PlannedIncome>,
     private planningService: PlanningService,
   ) {}
 
   async create(
-    createPlanningIncomeDto: CreateIncomePlanning,
-  ): Promise<IncomePlanning> {
+    createPlanningIncomeDto: CreateIncomePlanningDto,
+  ): Promise<PlannedIncome> {
     const existingPlanning = await this.planningService.getById(
       createPlanningIncomeDto.planning_id,
     );
@@ -51,11 +51,11 @@ export class IncomePlanningService {
   //   update
   // )
 
-  async getById(income_planning_id: number): Promise<IncomePlanning | null> {
+  async getById(income_planning_id: number): Promise<PlannedIncome | null> {
     return this.planningIncomeRepository.findOneBy({ income_planning_id });
   }
 
-  async getAll(): Promise<IncomePlanning[]> {
+  async getAll(): Promise<PlannedIncome[]> {
     return this.planningIncomeRepository.find();
   }
 
@@ -68,6 +68,7 @@ export class IncomePlanningService {
   }
 
   async removeById(id: number): Promise<void> {
+    id;
     const existIncomePlanning = await this.getById(id);
     const count = await this.planningIncomeRepository.count();
 

@@ -9,7 +9,7 @@ import { Planning } from "./planning.entity";
 import { IncomeType } from "../income/interfaces/income.interface";
 
 @Entity()
-export class IncomePlanning {
+export class PlannedIncome {
   @PrimaryGeneratedColumn()
   income_planning_id: number;
 
