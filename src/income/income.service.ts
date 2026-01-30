@@ -60,13 +60,46 @@ export class IncomeService {
       totalItems: number;
       limit: number;
       page: number;
+      availableYears: number[];
     };
   }> {
-    const { month, account_id, limit = 10, page = 1 } = filterDto;
+    const { month, account_id, year, limit = 10, page = 1 } = filterDto;
+
+    // Obtener años disponibles
+    const availableYears = await this.getAvailableYears();
+    const currentYear = new Date().getFullYear();
+
+    // Validar que el año solicitado tenga datos
+    let filterYear = year || currentYear.toString();
+    const yearNumber = parseInt(filterYear);
+
+    // Si el año solicitado no tiene datos, usar el año más reciente disponible
+    if (!availableYears.includes(yearNumber)) {
+      filterYear = availableYears[0]?.toString() || currentYear.toString();
+    }
 
     const queryBuilder = this.incomeRepository
       .createQueryBuilder("income")
       .leftJoinAndSelect("income.account", "account");
+
+    // FILTRAR POR AÑO (solo si se especifica un año)
+    if (year && year !== "") {
+      const startDate = new Date(parseInt(year), 0, 1);
+      const endDate = new Date(parseInt(year), 11, 31);
+      queryBuilder.where(
+        "income.income_date >= :startDate AND income.income_date <= :endDate",
+        { startDate, endDate },
+      );
+    } else {
+      // Si no se especifica año, mostrar solo el año actual
+      const currentYear = new Date().getFullYear();
+      const startDate = new Date(currentYear, 0, 1);
+      const endDate = new Date(currentYear, 11, 31);
+      queryBuilder.where(
+        "income.income_date >= :startDate AND income.income_date <= :endDate",
+        { startDate, endDate },
+      );
+    }
     // Filtrar por mes
     if (month) {
       const startDate = new Date(new Date().getFullYear(), month - 1, 1); // Primer día del mes
@@ -85,6 +118,7 @@ export class IncomeService {
     }
     // Contar el total de registros
     const totalItems = await queryBuilder.getCount();
+
     // Aplicar paginación
     const data = await queryBuilder
       .skip((page - 1) * limit)
@@ -95,11 +129,14 @@ export class IncomeService {
         "account.account_name",
         "account.account_type",
       ])
+
       .getMany();
+
     return {
       data,
       meta: {
         totalItems,
+        availableYears,
         limit,
         page,
       },
@@ -183,4 +220,52 @@ export class IncomeService {
     // Eliminar todos los ingresos
     await this.incomeRepository.clear();
   }
+
+  // Meotodos alternativos
+
+  //obtener años con datos disponibles
+  async getAvailableYears(): Promise<number[]> {
+    // Para SQLite: usar strftime('%Y', fecha)
+    const result = await this.incomeRepository
+      .createQueryBuilder("income")
+      .select(`DISTINCT strftime('%Y', income.income_date) as year`)
+      .orderBy("year", "DESC")
+      .getRawMany();
+
+    // Formatear resultado
+    const years = result
+      .map((item) => parseInt(item.year))
+      .filter((year) => !isNaN(year) && year > 0); // Filtrar valores inválidos
+
+    // Asegurarse de que el año actual esté incluido
+    const currentYear = new Date().getFullYear();
+    if (years.length > 0 && !years.includes(currentYear)) {
+      years.unshift(currentYear);
+    } else if (years.length === 0) {
+      years.push(currentYear);
+    }
+
+    return years;
+  }
+
+  // // Agrega este método a tu servicio
+  // async getAvailableYears(): Promise<number[]> {
+  //   // Query para obtener años DISTINCT que tienen ingresos
+  //   const result = await this.incomeRepository
+  //     .createQueryBuilder("income")
+  //     .select("DISTINCT EXTRACT(YEAR FROM income.income_date) as year")
+  //     .orderBy("year", "DESC") // Ordenar del más reciente al más antiguo
+  //     .getRawMany();
+
+  //   // Formatear resultado
+  //   const years = result.map((item) => parseInt(item.year));
+
+  //   // Asegurarse de que el año actual esté incluido
+  //   const currentYear = new Date().getFullYear();
+  //   if (!years.includes(currentYear)) {
+  //     years.unshift(currentYear); // Agregar al inicio
+  //   }
+
+  //   return years;
+  // }
 }

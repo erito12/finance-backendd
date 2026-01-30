@@ -2,7 +2,7 @@ import { ApiProperty } from "@nestjs/swagger";
 import { IsNotEmpty, IsNumber, IsPositive, IsString } from "class-validator";
 import { IncomeType } from "../../income/interfaces/income.interface";
 
-export class CreateIncomePlanning {
+export class CreateIncomePlanningDto {
   @IsNumber()
   @IsNotEmpty()
   @ApiProperty({

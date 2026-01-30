@@ -13,7 +13,7 @@ import {
 } from "../planned-expend/interfaces/planned-expend.interface";
 
 @Entity()
-export class PlannedExpend {
+export class ExpensePlanning {
   @PrimaryGeneratedColumn()
   planned_expend_id: number;
 

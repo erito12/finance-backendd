@@ -1,5 +1,5 @@
 import { ApiProperty } from "@nestjs/swagger";
-import { IsInt, IsOptional, IsPositive } from "class-validator";
+import { IsInt, IsOptional, IsPositive, IsString } from "class-validator";
 import { FilterDto } from "../../common/dto/filter.dto";
 
 export class IncomeFilterDto extends FilterDto {
@@ -11,6 +11,10 @@ export class IncomeFilterDto extends FilterDto {
   @IsInt()
   @IsPositive()
   month?: number;
+
+  @IsOptional()
+  @IsString()
+  year?: string;
 
   @ApiProperty({
     required: false,

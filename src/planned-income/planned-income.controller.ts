@@ -8,8 +8,8 @@ import {
   Post,
   // Put,
 } from "@nestjs/common";
-import { IncomePlanningService } from "./planning-income.service";
-import { CreateIncomePlanning } from "./dto/create-planning-income.dto";
+import { IncomePlanningService } from "./planned-income.service";
+import { CreateIncomePlanningDto } from "./dto/create-planning-income.dto";
 // import { ApiResponse } from "@nestjs/swagger";
 // import { IncomePlanning } from "../entities/planning-income.entity";
 // import { UpdateIncomePlanningDto } from "./dto/update-planning-income.dto";
@@ -19,8 +19,8 @@ export class PlanningIncomeController {
   constructor(private readonly incomePlanningService: IncomePlanningService) {}
 
   @Post()
-  async create(@Body() createIncomePlanning: CreateIncomePlanning) {
-    return this.incomePlanningService.create(createIncomePlanning);
+  async create(@Body() createIncomePlanningDto: CreateIncomePlanningDto) {
+    return this.incomePlanningService.create(createIncomePlanningDto);
   }
 
   @Get()

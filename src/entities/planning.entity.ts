@@ -1,5 +1,5 @@
 import { Column, Entity, OneToMany, PrimaryGeneratedColumn } from "typeorm";
-import { PlannedExpend } from "./planning-expend.entity";
+import { ExpensePlanning } from "./expense-planning.entity";
 
 @Entity()
 export class Planning {
@@ -18,9 +18,12 @@ export class Planning {
   @Column({ type: "date" })
   end_date: Date;
 
-  @OneToMany(() => PlannedExpend, (plannedExpend) => plannedExpend.planning)
-  planned_expends: PlannedExpend[];
+  @OneToMany(
+    () => ExpensePlanning,
+    (ExpensePlanning) => ExpensePlanning.planning,
+  )
+  planned_expends: ExpensePlanning[];
 
-  @OneToMany(() => PlannedExpend, (plannedIncome) => plannedIncome.planning)
-  planned_incomes: PlannedExpend[];
+  @OneToMany(() => ExpensePlanning, (plannedIncome) => plannedIncome.planning)
+  planned_incomes: ExpensePlanning[];
 }
