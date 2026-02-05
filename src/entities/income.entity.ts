@@ -1,39 +1,62 @@
 import {
-  Entity,
   Column,
-  PrimaryGeneratedColumn,
-  ManyToOne,
+  Entity,
   JoinColumn,
+  ManyToOne,
+  PrimaryGeneratedColumn,
+  CreateDateColumn,
+  UpdateDateColumn,
+  Check,
 } from "typeorm";
 import { Account } from "./account.entity";
-import { IsNotEmpty, IsNumber } from "class-validator";
-import { IncomeType } from "../income/interfaces/income.interface";
 
-@Entity()
+@Entity("incomes")
+@Check(`"income_amount" >= 0`)
 export class Income {
-  @PrimaryGeneratedColumn()
+  @PrimaryGeneratedColumn("increment", { name: "income_id" })
   income_id: number;
 
-  @Column({ type: "date", default: () => "CURRENT_DATE" })
+  @Column({
+    name: "income_date",
+    type: "date",
+    default: () => "CURRENT_DATE",
+  })
   income_date: Date;
 
-  @Column({ type: "varchar" })
-  income_type: IncomeType;
-
-  @Column({ type: "float" })
+  @Column({
+    name: "income_amount",
+    type: "decimal",
+    precision: 15,
+    scale: 2,
+  })
   income_amount: number;
 
-  @Column({ type: "varchar" })
-  income_details: string;
+  @Column({
+    name: "income_description",
+    type: "text",
+    nullable: true,
+  })
+  income_description: string;
 
   @Column({ name: "account_id" })
-  @IsNotEmpty()
-  @IsNumber()
   account_id: number;
 
   @ManyToOne(() => Account, (account) => account.incomes, {
     onDelete: "CASCADE",
+    nullable: false,
   })
   @JoinColumn({ name: "account_id" })
   account: Account;
+
+  @CreateDateColumn({
+    name: "created_at",
+    type: "timestamp",
+  })
+  created_at: Date;
+
+  @UpdateDateColumn({
+    name: "updated_at",
+    type: "timestamp",
+  })
+  updated_at: Date;
 }
