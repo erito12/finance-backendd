@@ -2,6 +2,7 @@ import { Column, Entity, OneToMany, PrimaryGeneratedColumn } from "typeorm";
 import { Income } from "./income.entity";
 import { Expense } from "./expense.entity";
 import { accountTypes } from "../account/interfaces/account.interface";
+import { Distribution } from "./distribution.entity";
 
 @Entity()
 export class Account {
@@ -26,4 +27,7 @@ export class Account {
 
   @OneToMany(() => Expense, (expense) => expense.account)
   expenses: Expense[];
+
+  @OneToMany(() => Distribution, (distribution) => distribution.account)
+  distribution: Distribution[];
 }
