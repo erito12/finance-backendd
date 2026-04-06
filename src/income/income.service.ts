@@ -8,6 +8,7 @@ import { CreateIncomeDto } from "./dto/create-income.dto";
 import { IncomeFilterDto } from "./dto/income-filter.dto";
 import { Income } from "../entities/income.entity";
 import { AccountService } from "../account/account.service";
+import { PurposeService } from "../purpose/purpose.service";
 
 @Injectable()
 export class IncomeService {
@@ -15,6 +16,7 @@ export class IncomeService {
     @InjectRepository(Income)
     private incomeRepository: Repository<Income>,
     private accountService: AccountService,
+    private purposeService: PurposeService,
   ) {}
 
   async create(createIncomeDto: CreateIncomeDto): Promise<Income> {
@@ -43,6 +45,7 @@ export class IncomeService {
       ...createIncomeDto,
       account: accountExists,
     });
+
     const saveIncome = await this.incomeRepository.save(newIncome);
 
     await this.accountService.updateAccountAmount(
@@ -50,6 +53,9 @@ export class IncomeService {
       createIncomeDto.income_amount,
       false,
     );
+
+    // 2. NUEVO: Distribuir en los propósitos
+    await this.purposeService.distributeIncome(createIncomeDto.income_amount);
 
     return this.incomeRepository.save(saveIncome);
   }
@@ -155,32 +161,28 @@ export class IncomeService {
     updateIncomeDto: UpdateIncomeDto,
   ): Promise<Income | null> {
     const existingIncome = await this.getById(id);
-
     if (!existingIncome) return null;
 
-    const accountId = existingIncome.account_id;
-
-    // Verificar si hay un cambio en el monto del ingreso
     if (
       updateIncomeDto.income_amount !== undefined &&
       updateIncomeDto.income_amount !== existingIncome.income_amount
     ) {
-      // Calcular la diferencia entre el nuevo monto y el existente
       const amountChange =
         updateIncomeDto.income_amount - existingIncome.income_amount;
 
-      // Actualizar el monto de la cuenta asociada
+      // 1. Actualizar Cuenta Física
       await this.accountService.updateAccountAmount(
-        accountId,
-        amountChange, // Aquí se pasa la diferencia
-        false, // false porque estamos actualizando un ingreso
+        existingIncome.account_id,
+        Math.abs(amountChange),
+        amountChange < 0, // Si el cambio es negativo (el ingreso bajó), restamos de la cuenta
       );
+
+      // 2. Redistribuir la diferencia en los propósitos
+      // Si ganaste $100 más, repartimos esos $100 según los %
+      await this.purposeService.distributeIncome(amountChange);
     }
 
-    // Actualizar el ingreso en la base de datos
     await this.incomeRepository.update(id, updateIncomeDto);
-
-    // Retornar el ingreso actualizado
     return this.getById(id);
   }
 
@@ -217,6 +219,7 @@ export class IncomeService {
       //Llamar a la funcion de Actualizar el monto de la cuenta
       await this.accountService.updateAccountAmount(accountId, amount, true);
     }
+
     // Eliminar todos los ingresos
     await this.incomeRepository.clear();
   }
@@ -247,25 +250,4 @@ export class IncomeService {
 
     return years;
   }
-
-  // // Agrega este método a tu servicio
-  // async getAvailableYears(): Promise<number[]> {
-  //   // Query para obtener años DISTINCT que tienen ingresos
-  //   const result = await this.incomeRepository
-  //     .createQueryBuilder("income")
-  //     .select("DISTINCT EXTRACT(YEAR FROM income.income_date) as year")
-  //     .orderBy("year", "DESC") // Ordenar del más reciente al más antiguo
-  //     .getRawMany();
-
-  //   // Formatear resultado
-  //   const years = result.map((item) => parseInt(item.year));
-
-  //   // Asegurarse de que el año actual esté incluido
-  //   const currentYear = new Date().getFullYear();
-  //   if (!years.includes(currentYear)) {
-  //     years.unshift(currentYear); // Agregar al inicio
-  //   }
-
-  //   return years;
-  // }
 }

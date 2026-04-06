@@ -9,6 +9,7 @@ import {
 } from "typeorm";
 import { Account } from "./account.entity";
 import { expenseCategory } from "../expense/interface/expense.interface";
+import { PurposeEntity } from "./purpose.entity";
 
 @Entity()
 export class Expense {
@@ -36,4 +37,11 @@ export class Expense {
   })
   @JoinColumn({ name: "account_id" })
   account: Account;
+
+  @Column({ name: "purpose_id", nullable: true }) // nullable por si tienes gastos sin propósito
+  purpose_id: number;
+
+  @ManyToOne(() => PurposeEntity)
+  @JoinColumn({ name: "purpose_id" })
+  purpose: PurposeEntity;
 }

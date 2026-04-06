@@ -143,6 +143,7 @@ export class IncomeController {
     }
     return this.incomeService.removeById(id);
   }
+
   @Delete()
   async removeAll() {
     await this.incomeService.removeAll();

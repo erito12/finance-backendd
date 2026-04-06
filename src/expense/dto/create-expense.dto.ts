@@ -29,4 +29,8 @@ export class CreateExpenseDto {
     description: "Introducir el id de la cuenta",
   })
   account_id: number;
+
+  @IsNotEmpty() // 👈 Ahora es obligatorio para saber de dónde descontar
+  @IsNumber()
+  purpose_id: number;
 }

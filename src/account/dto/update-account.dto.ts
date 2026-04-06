@@ -1,6 +1,6 @@
 import { ApiProperty } from "@nestjs/swagger";
 import { IsNumber, IsPositive, IsString } from "class-validator";
-import { accountTypes } from "../interfaces/account.interface";
+import { CoinsType } from "../../common/interface/coin-type.interface";
 
 export class UpdateAccountDto {
   @ApiProperty({
@@ -15,7 +15,7 @@ export class UpdateAccountDto {
     description: "Añadir cuentas que poseas",
     required: false,
   })
-  account_type?: accountTypes;
+  account_type?: CoinsType;
 
   @IsNumber()
   @IsPositive()

@@ -1,5 +1,6 @@
 import { ApiProperty } from "@nestjs/swagger";
 import { expenseCategory } from "../interface/expense.interface";
+import { IsNotEmpty, IsNumber } from "class-validator";
 // import { expenseType } from "../interface/expense.interface";
 
 export class UpdateExpenseDto {
@@ -23,4 +24,8 @@ export class UpdateExpenseDto {
     required: false,
   })
   expense_details: string;
+
+  @IsNotEmpty() // 👈 Ahora es obligatorio para saber de dónde descontar
+  @IsNumber()
+  purpose_id?: number;
 }

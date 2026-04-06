@@ -1,8 +1,7 @@
 import { Column, Entity, OneToMany, PrimaryGeneratedColumn } from "typeorm";
 import { Income } from "./income.entity";
 import { Expense } from "./expense.entity";
-import { accountTypes } from "../account/interfaces/account.interface";
-import { Distribution } from "./distribution.entity";
+import { CoinsType } from "../common/interface/coin-type.interface";
 
 @Entity()
 export class Account {
@@ -17,7 +16,7 @@ export class Account {
   @Column({
     type: "varchar",
   })
-  account_type: accountTypes;
+  account_type: CoinsType;
 
   @Column({ type: "float" })
   account_amount: number;
@@ -27,7 +26,4 @@ export class Account {
 
   @OneToMany(() => Expense, (expense) => expense.account)
   expenses: Expense[];
-
-  @OneToMany(() => Distribution, (distribution) => distribution.account)
-  distribution: Distribution[];
 }

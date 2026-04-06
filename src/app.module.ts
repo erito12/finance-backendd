@@ -14,8 +14,9 @@ import { PlannedExpendModule } from "./planned-expend/expense-planing.module";
 import { ExpensePlanning } from "./entities/expense-planning.entity";
 import { PlannedIncome } from "./entities/income-planning.entity";
 import { PlannedIncomeModule } from "./planned-income/planned-income.module";
-import { Distribution } from "./entities/distribution.entity";
-import { DistributionModule } from "./distribution/distribution.module";
+import { PurposeEntity } from "./entities/purpose.entity";
+import { PurposeModule } from "./purpose/purpose.module";
+import { CommonModule } from "./common/common.module";
 
 const typeOrmConfig: TypeOrmModuleOptions = {
   type: "sqlite",
@@ -27,7 +28,7 @@ const typeOrmConfig: TypeOrmModuleOptions = {
     Planning,
     ExpensePlanning,
     PlannedIncome,
-    Distribution,
+    PurposeEntity,
   ],
   synchronize: true,
 };
@@ -41,7 +42,8 @@ const typeOrmConfig: TypeOrmModuleOptions = {
     PlanningModule,
     PlannedExpendModule,
     PlannedIncomeModule,
-    DistributionModule,
+    PurposeModule,
+    CommonModule,
   ],
 })
 export class AppModule {}

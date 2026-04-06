@@ -1,17 +1,21 @@
 import { BadRequestException, Injectable } from "@nestjs/common";
 import { InjectRepository } from "@nestjs/typeorm";
-
 import { Repository } from "typeorm";
+
 import { UpdateAccountDto } from "./dto/update-account.dto";
 import { CreateAccountDto } from "./dto/create-account.dto";
-import { accountTypes } from "./interfaces/account.interface";
+
 import { Account } from "../entities/account.entity";
+import { CoinsType } from "../common/interface/coin-type.interface";
+import { conversionRates } from "../common/interface/conversion-rates.interface";
+import { ConversionService } from "../common/service/conversion/conversion.service";
 
 @Injectable()
 export class AccountService {
   constructor(
     @InjectRepository(Account)
     private accountRepository: Repository<Account>,
+    private readonly conversionService: ConversionService,
   ) {}
 
   async create(createAccountDto: CreateAccountDto): Promise<Account> {
@@ -85,9 +89,10 @@ export class AccountService {
 
   //Metodos alternativos
 
+  //Actualizar el monto de la cuenta
   async updateAccountAmount(
     accountId: number,
-    amountCnage: number,
+    amountChange: number,
     isExpense,
   ): Promise<Account> {
     const account = await this.getById(accountId);
@@ -95,7 +100,7 @@ export class AccountService {
       throw new BadRequestException("La cuenta no existe.");
     }
     //Actualizar el monto de la cuenta
-    account.account_amount += isExpense ? -amountCnage : amountCnage;
+    account.account_amount += isExpense ? -amountChange : amountChange;
 
     return this.accountRepository.save(account);
   }
@@ -106,31 +111,21 @@ export class AccountService {
       throw new BadRequestException("No hay cuentas registradas.");
     }
 
-    // Objeto para almacenar las conversiones
-    const conversionRates: Record<accountTypes, number> = {
-      Efectivo: 1, // 1 Efectivo = 1 Efectivo
-      Tarjeta: 1, // Asumimos que es igual a Efectivo
-      MLC: 200, // 1 MLC = 270 Efectivo
-      USD: 450, // 1 USD = 450 Efectivo
-      USDT: 430, // 1 USDT = 430 Efectivo
-      Clasica: 400, // 1 Clasica = 400 Efectivo
-    };
-
     // Calcular el total en Efectivo
     return accounts.reduce((total, account) => {
       const conversionRate = conversionRates[account.account_type];
-      const amountInEfectivo = account.account_amount * conversionRate;
-      return total + amountInEfectivo;
+      const amountInCash = account.account_amount * conversionRate;
+      return total + amountInCash;
     }, 0);
   }
 
-  async getBalanceByAccountType(): Promise<Record<accountTypes, number>> {
+  async getBalanceByAccountType(): Promise<Record<CoinsType, number>> {
     const accounts = await this.accountRepository.find();
     if (!accounts.length) {
       throw new BadRequestException("No hay cuentas registradas.");
     }
 
-    const balanceByType: Record<accountTypes, number> = {
+    const balanceByType: Record<CoinsType, number> = {
       Efectivo: 0,
       Tarjeta: 0,
       MLC: 0,
@@ -146,70 +141,46 @@ export class AccountService {
     return balanceByType;
   }
 
-  async exchangeMoney(
-    sourceAccountId: number,
-    targetAccountId: number,
-    amount: number,
-  ): Promise<{ sourceAccount: Account; targetAccount: Account }> {
-    const sourceAccount = await this.getById(sourceAccountId);
-    const targetAccount = await this.getById(targetAccountId);
-
-    if (!sourceAccount) {
-      throw new BadRequestException("La cuenta de origen no existe.");
-    }
-    if (!targetAccount) {
-      throw new BadRequestException("La cuenta de destino no existe.");
+  async exchangeMoney(sourceId: number, targetId: number, amount: number) {
+    // 1. Obtención de datos (Específico de este módulo)
+    const [source, target] = await Promise.all([
+      this.getById(sourceId),
+      this.getById(targetId),
+    ]);
+    // Esta validación es la "guarda".
+    // Si source o target son null, lanzamos una excepción y el código se detiene.
+    if (!source || !target) {
+      throw new BadRequestException("Una o ambas cuentas no existen.");
     }
 
-    if (amount <= 0) {
-      throw new BadRequestException("El monto debe ser un número positivo.");
-    }
-    if (sourceAccount.account_amount < amount) {
-      throw new BadRequestException(
-        "La cuenta de origen no tiene suficiente saldo.",
-      );
-    }
+    // A partir de aquí, para TS, 'source' y 'target' ya NO son null, son 'Account'.
+    this.validateExchange(source, target, amount);
 
-    // Definir las tasas de conversión
-    const conversionRates: Record<string, number> = {
-      Efectivo: 1,
-      Tarjeta: 1,
-      MLC: 200, // 1 MLC = 200 Efectivo
-      USD: 450, // 1 USD = 450 Efectivo
-      USDT: 430, // 1 USDT = 430 Efectivo
-      Clasica: 400, // 1 Clasica = 400 Efectivo
-    };
-
-    let amountInTargetCurrency = amount;
-
-    // Convertir el monto según los tipos de cuenta
-    if (sourceAccount.account_type !== targetAccount.account_type) {
-      const sourceRate = conversionRates[sourceAccount.account_type];
-      const targetRate = conversionRates[targetAccount.account_type];
-
-      // Convertir el monto a efectivo
-      const amountInEfectivo = amount * sourceRate;
-
-      // Convertir el monto de efectivo a la moneda de destino
-      amountInTargetCurrency = amountInEfectivo / targetRate;
-    }
-
-    // Actualizar las cuentas
-    sourceAccount.account_amount -= amount;
-    targetAccount.account_amount += parseFloat(
-      amountInTargetCurrency.toFixed(2),
+    // 3. Uso de la lógica genérica (Aquí está la magia)
+    const convertedAmount = this.conversionService.calculateExchange(
+      amount,
+      source.account_type,
+      target.account_type,
     );
 
-    await this.accountRepository.save(sourceAccount);
-    await this.accountRepository.save(targetAccount);
+    // 4. Aplicación de cambios
+    source.account_amount -= amount;
+    target.account_amount += convertedAmount;
+
+    await this.accountRepository.save([source, target]);
 
     return {
-      sourceAccount,
-      targetAccount: {
-        ...targetAccount,
-        account_amount: parseFloat(targetAccount.account_amount.toFixed(2)),
-      },
+      sourceAccount: source, // 'source' (variable) se asigna a 'sourceAccount' (llave)
+      targetAccount: target,
     };
+  }
+
+  private validateExchange(source: Account, target: Account, amount: number) {
+    if (!source || !target)
+      throw new BadRequestException("Cuentas no encontradas");
+    if (amount <= 0) throw new BadRequestException("Monto inválido");
+    if (source.account_amount < amount)
+      throw new BadRequestException("Saldo insuficiente");
   }
 
   async getAccountBalance(id: number): Promise<number> {

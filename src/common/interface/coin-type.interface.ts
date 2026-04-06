@@ -1,4 +1,4 @@
-export type accountTypes =
+export type CoinsType =
   | "Efectivo"
   | "Tarjeta"
   | "MLC"
