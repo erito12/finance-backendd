@@ -20,7 +20,7 @@ export class Income {
   @Column({ type: "varchar" })
   income_type: IncomeType;
 
-  @Column({ type: "float" })
+  @Column({ type: "numeric" })
   income_amount: number;
 
   @Column({ type: "varchar" })

@@ -9,10 +9,10 @@ export class PurposeEntity {
   @Column({ type: "varchar" })
   purpose_name: string;
 
-  @Column({ type: "float" })
+  @Column({ type: "numeric" })
   purpose_percentage: number;
 
-  @Column({ type: "float" })
+  @Column({ type: "numeric" })
   purpose_balance: number;
 
   @OneToMany(() => Expense, (expense) => expense.purpose)

@@ -22,7 +22,7 @@ export class Expense {
   @Column({ type: "varchar" })
   expense_category: expenseCategory;
 
-  @Column({ type: "float" })
+  @Column({ type: "numeric" })
   expense_amount: number;
 
   @Column({ type: "varchar" })

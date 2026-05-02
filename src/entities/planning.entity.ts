@@ -9,7 +9,7 @@ export class Planning {
   @Column({ type: "varchar" })
   planning_name: string;
 
-  @Column({ type: "float" })
+  @Column({ type: "numeric" })
   initial_budget: number;
 
   @Column({ type: "date" })

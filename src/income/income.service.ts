@@ -228,17 +228,16 @@ export class IncomeService {
 
   //obtener años con datos disponibles
   async getAvailableYears(): Promise<number[]> {
-    // Para SQLite: usar strftime('%Y', fecha)
     const result = await this.incomeRepository
       .createQueryBuilder("income")
-      .select(`DISTINCT strftime('%Y', income.income_date) as year`)
+      .select(`DISTINCT EXTRACT(YEAR FROM income.income_date) as year`)
       .orderBy("year", "DESC")
       .getRawMany();
 
     // Formatear resultado
     const years = result
       .map((item) => parseInt(item.year))
-      .filter((year) => !isNaN(year) && year > 0); // Filtrar valores inválidos
+      .filter((year) => !isNaN(year) && year > 0);
 
     // Asegurarse de que el año actual esté incluido
     const currentYear = new Date().getFullYear();

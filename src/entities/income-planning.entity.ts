@@ -19,10 +19,10 @@ export class PlannedIncome {
   @Column({ type: "varchar" })
   income_planning_details: string;
 
-  @Column({ type: "float" })
+  @Column({ type: "numeric" })
   income_planning_amount: number;
 
-  @Column({ type: "float" })
+  @Column({ type: "int" })
   planning_id: number;
 
   @ManyToOne(() => Planning, (planning) => planning.planned_incomes, {

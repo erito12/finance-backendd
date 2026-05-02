@@ -20,7 +20,7 @@ export class ExpensePlanning {
   @Column({ type: "varchar" })
   category: plannedExpenseCategory;
 
-  @Column({ type: "float" })
+  @Column({ type: "numeric" })
   amount: number;
 
   @Column({ type: "varchar" })
@@ -32,7 +32,7 @@ export class ExpensePlanning {
   @Column({ type: "varchar" })
   product_name?: string;
 
-  @Column({ type: "float" })
+  @Column({ type: "int" })
   @IsNotEmpty()
   @IsNumber()
   planning_id: number;

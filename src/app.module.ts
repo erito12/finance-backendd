@@ -19,8 +19,12 @@ import { PurposeModule } from "./purpose/purpose.module";
 import { CommonModule } from "./common/common.module";
 
 const typeOrmConfig: TypeOrmModuleOptions = {
-  type: "sqlite",
-  database: "finance.db",
+  type: "postgres",
+  host: "localhost",
+  port: 5432,
+  username: "postgres",
+  password: "Erito1234",
+  database: "FinanceBD",
   entities: [
     Income,
     Account,

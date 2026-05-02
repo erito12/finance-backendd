@@ -18,7 +18,7 @@ export class Account {
   })
   account_type: CoinsType;
 
-  @Column({ type: "float" })
+  @Column({ type: "numeric" })
   account_amount: number;
 
   @OneToMany(() => Income, (income) => income.account)

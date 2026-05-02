@@ -29,8 +29,11 @@ export class CreateExpenseDto {
     description: "Introducir el id de la cuenta",
   })
   account_id: number;
-
-  @IsNotEmpty() // 👈 Ahora es obligatorio para saber de dónde descontar
+  @IsNotEmpty()
   @IsNumber()
+  @ApiProperty({
+    example: 1,
+    description: "Introducir el id de la cuenta",
+  })
   purpose_id: number;
 }
