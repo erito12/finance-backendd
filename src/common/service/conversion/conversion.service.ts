@@ -1,27 +1,38 @@
-import { Injectable } from "@nestjs/common";
-import { CoinsType } from "../../interface/coin-type.interface";
-
-// conversion.service.ts
+import { Injectable, NotFoundException } from "@nestjs/common";
+import { InjectRepository } from "@nestjs/typeorm";
+import { Repository } from "typeorm";
+import { CurrencyEntity } from "../../../entities/currency.entity";
 
 @Injectable()
 export class ConversionService {
-  private readonly conversionRates = {
-    Efectivo: 1,
-    Tarjeta: 1,
-    MLC: 200, // 1 MLC = 200 Efectivo
-    USD: 450, // 1 USD = 450 Efectivo
-    USDT: 430, // 1 USDT = 430 Efectivo
-    Clasica: 400, // 1 Clasica = 400 Efectivo
-  };
+  constructor(
+    @InjectRepository(CurrencyEntity)
+    private readonly currencyRepository: Repository<CurrencyEntity>,
+  ) {}
 
-  calculateExchange(amount: number, from: CoinsType, to: CoinsType): number {
-    if (from === to) return amount;
+  async calculateExchange(
+    amount: number,
+    fromCode: string,
+    toCode: string,
+  ): Promise<number> {
+    if (fromCode === toCode) return amount;
 
-    const sourceRate = this.conversionRates[from];
-    const targetRate = this.conversionRates[to];
+    const [source, target] = await Promise.all([
+      this.currencyRepository.findOneBy({ code: fromCode }),
+      this.currencyRepository.findOneBy({ code: toCode }),
+    ]);
 
-    const amountInBase = amount * sourceRate;
-    const result = amountInBase / targetRate;
+    if (!source || !target) {
+      throw new NotFoundException("Monedas no encontradas para la conversión.");
+    }
+
+    // 1. Convertimos el monto de la moneda origen a CUP (Nueva Moneda Base)
+    // Ejemplo: 2 USD * 450 (tasa USD) = 900 CUP
+    const amountInCUP = amount * source.exchangeRate;
+
+    // 2. Convertimos de CUP a la moneda destino
+    // Ejemplo: 900 CUP / 200 (tasa MLC) = 4.50 MLC
+    const result = amountInCUP / target.exchangeRate;
 
     return parseFloat(result.toFixed(2));
   }

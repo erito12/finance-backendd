@@ -39,7 +39,7 @@ export class ExpenseService {
     }
 
     // Comparar el monto del gasto con el saldo de la cuenta
-    if (createExpenseDto.expense_amount > accountExists.account_amount) {
+    if (createExpenseDto.expense_amount > accountExists.totalBalance) {
       throw new BadRequestException(
         "Esta acción no se puede realizar porque el gasto es mayor que el fondo.",
       );

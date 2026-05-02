@@ -7,7 +7,7 @@ import {
   ManyToOne,
   PrimaryGeneratedColumn,
 } from "typeorm";
-import { Account } from "./account.entity";
+import { AccountEntity } from "./account.entity";
 import { expenseCategory } from "../expense/interface/expense.interface";
 import { PurposeEntity } from "./purpose.entity";
 
@@ -32,11 +32,11 @@ export class Expense {
   @IsNumber()
   account_id: number;
 
-  @ManyToOne(() => Account, (account) => account.expenses, {
+  @ManyToOne(() => AccountEntity, (account) => account.expenses, {
     onDelete: "CASCADE",
   })
   @JoinColumn({ name: "account_id" })
-  account: Account;
+  account: AccountEntity;
 
   @Column({ name: "purpose_id", nullable: true }) // nullable por si tienes gastos sin propósito
   purpose_id: number;

@@ -1,28 +1,33 @@
 import { ApiProperty } from "@nestjs/swagger";
-import { IsNumber, IsPositive, IsString } from "class-validator";
-import { CoinsType } from "../../common/interface/coin-type.interface";
+import { IsEnum, IsInt, IsNumber, IsPositive } from "class-validator";
+
+import { AccountStorageType } from "../../common/enum/AccountStorageType";
 
 export class UpdateAccountDto {
   @ApiProperty({
     example: "tarjeta personal",
     description: "Añadir el nombre de esta cuenta",
+    required: false,
+  })
+  accountName?: string;
+
+  @IsInt()
+  @ApiProperty({ description: "ID de la moneda (Currency)", required: true })
+  currencyId: number;
+
+  @IsEnum(AccountStorageType)
+  @ApiProperty({
+    enum: AccountStorageType,
+    example: AccountStorageType.VIRTUAL,
+  })
+  storageType?: AccountStorageType;
+
+  @IsPositive()
+  @IsNumber()
+  @ApiProperty({
+    example: 2000,
+    description: "Monto inicial de la cuenta",
     required: true,
   })
-  account_name: string;
-  @IsString()
-  @ApiProperty({
-    example: "Efectivo",
-    description: "Añadir cuentas que poseas",
-    required: false,
-  })
-  account_type?: CoinsType;
-
-  @IsNumber()
-  @IsPositive()
-  @ApiProperty({
-    example: "60000",
-    description: "Monto inicial de la cuenta",
-    required: false,
-  })
-  account_amount?: number;
+  initialBalance: number;
 }

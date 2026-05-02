@@ -1,10 +1,16 @@
 // src/common/common.module.ts
 import { Global, Module } from "@nestjs/common";
+import { TypeOrmModule } from "@nestjs/typeorm";
 import { ConversionService } from "./service/conversion/conversion.service";
+// Asegura la ruta
+import { CurrencyEntity } from "../entities/currency.entity";
+import { CurrencyService } from "../currency/currency.service";
+import { ScrapingService } from "./service/scraper/coin-value-scraper.service";
 
-@Global() // Esto hace que no tengas que importar el CommonModule en cada módulo
+@Global()
 @Module({
-  providers: [ConversionService],
-  exports: [ConversionService], // ¡Importante para que otros puedan usarlo!
+  imports: [TypeOrmModule.forFeature([CurrencyEntity])],
+  providers: [ConversionService, CurrencyService, ScrapingService], // Añadido aquí
+  exports: [ConversionService, CurrencyService, ScrapingService], // Añadido aquí
 })
 export class CommonModule {}

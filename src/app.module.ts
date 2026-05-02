@@ -5,7 +5,7 @@ import { TypeOrmModuleOptions } from "@nestjs/typeorm";
 import { IncomeModule } from "./income/income.module";
 import { Income } from "./entities/income.entity";
 import { AccountModule } from "./account/account.module";
-import { Account } from "./entities/account.entity";
+import { AccountEntity } from "./entities/account.entity";
 import { ExpenseModule } from "./expense/expense.module";
 import { Expense } from "./entities/expense.entity";
 import { PlanningModule } from "./planning/planning.module";
@@ -17,6 +17,10 @@ import { PlannedIncomeModule } from "./planned-income/planned-income.module";
 import { PurposeEntity } from "./entities/purpose.entity";
 import { PurposeModule } from "./purpose/purpose.module";
 import { CommonModule } from "./common/common.module";
+import { CurrencyModule } from "./currency/currency.module";
+import { CurrencyEntity } from "./entities/currency.entity";
+import { SnakeNamingStrategy } from "typeorm-naming-strategies/snake-naming.strategy";
+import { ScheduleModule } from "@nestjs/schedule";
 
 const typeOrmConfig: TypeOrmModuleOptions = {
   type: "postgres",
@@ -25,21 +29,24 @@ const typeOrmConfig: TypeOrmModuleOptions = {
   username: "postgres",
   password: "Erito1234",
   database: "FinanceBD",
+  namingStrategy: new SnakeNamingStrategy(),
   entities: [
     Income,
-    Account,
+    AccountEntity,
     Expense,
     Planning,
     ExpensePlanning,
     PlannedIncome,
     PurposeEntity,
+    CurrencyEntity,
   ],
-  synchronize: true,
+  synchronize: true, // Solo para desarrollo, no usar en producción
 };
 
 @Module({
   imports: [
     TypeOrmModule.forRoot(typeOrmConfig),
+    ScheduleModule.forRoot(),
     IncomeModule,
     AccountModule,
     ExpenseModule,
@@ -48,6 +55,7 @@ const typeOrmConfig: TypeOrmModuleOptions = {
     PlannedIncomeModule,
     PurposeModule,
     CommonModule,
+    CurrencyModule,
   ],
 })
 export class AppModule {}

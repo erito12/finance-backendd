@@ -5,7 +5,7 @@ import {
   ManyToOne,
   JoinColumn,
 } from "typeorm";
-import { Account } from "./account.entity";
+import { AccountEntity } from "./account.entity";
 import { IsNotEmpty, IsNumber } from "class-validator";
 import { IncomeType } from "../income/interfaces/income.interface";
 
@@ -31,9 +31,9 @@ export class Income {
   @IsNumber()
   account_id: number;
 
-  @ManyToOne(() => Account, (account) => account.incomes, {
+  @ManyToOne(() => AccountEntity, (account) => account.incomes, {
     onDelete: "CASCADE",
   })
   @JoinColumn({ name: "account_id" })
-  account: Account;
+  account: AccountEntity;
 }
