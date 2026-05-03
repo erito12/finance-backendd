@@ -4,7 +4,7 @@ import { AccountEntity } from "./account.entity";
 @Entity()
 export class CurrencyEntity {
   @PrimaryGeneratedColumn()
-  currency_id: number;
+  currencyId: number;
 
   @Column({ unique: true })
   code: string; // "USD", "CUP", "MLC", "BTC"
@@ -16,7 +16,7 @@ export class CurrencyEntity {
   symbol: string;
 
   @Column({ default: false })
-  is_custom: boolean; // Indica si la creó el usuario o viene por defecto
+  isCustom: boolean; // Indica si la creó el usuario o viene por defecto
 
   @Column({
     type: "numeric",

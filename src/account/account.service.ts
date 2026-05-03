@@ -41,7 +41,7 @@ export class AccountService {
       );
     }
     const currency = await this.currencyRepository.findOneBy({
-      currency_id: createAccountDto.currencyId,
+      currencyId: createAccountDto.currencyId,
     });
     if (!currency) {
       throw new BadRequestException("La moneda especificada no existe.", {
@@ -77,14 +77,37 @@ export class AccountService {
     id: number,
     updateAccountDto: UpdateAccountDto,
   ): Promise<AccountEntity | null> {
-    const existingAccount = await this.getById(id);
-    if (!existingAccount) {
+    // 1. Usamos preload para buscar la entidad y aplicar los cambios del DTO en un solo paso
+    const account = await this.accountRepository.preload({
+      accountId: id,
+      ...updateAccountDto,
+      // Mapeamos manualmente la relación si viene en el DTO
+      currency: updateAccountDto.currencyId
+        ? { currencyId: updateAccountDto.currencyId }
+        : undefined,
+    });
+
+    // 2. Si no devuelve nada, la cuenta no existe en la BD
+    if (!account) {
       throw new BadRequestException(
         "No existe la cuenta que desea actualizar.",
       );
     }
-    await this.accountRepository.update(id, updateAccountDto);
-    return this.getById(id);
+
+    // 3. Validación de moneda (solo si se intentó cambiar)
+    if (updateAccountDto.currencyId) {
+      const currencyExists = await this.currencyRepository.findOneBy({
+        currencyId: updateAccountDto.currencyId,
+      });
+      if (!currencyExists) {
+        throw new BadRequestException("La moneda especificada no existe.", {
+          description: "No se encontró ninguna moneda con ese ID",
+        });
+      }
+    }
+
+    // 4. Guardamos la entidad ya actualizada (esto disparará validaciones y listeners)
+    return this.accountRepository.save(account);
   }
 
   async findAll(): Promise<AccountEntity[]> {
@@ -124,15 +147,32 @@ export class AccountService {
   }
 
   async calculateTotalAmount(): Promise<number> {
-    const accounts = await this.accountRepository.find();
+    const accounts = await this.accountRepository.find({
+      relations: ["currency"],
+    });
     if (!accounts.length) {
       throw new BadRequestException("No hay cuentas registradas.");
     }
 
-    // Calcular el total por divisa
-    return accounts.reduce((total, account) => {
-      return total + account.totalBalance;
-    }, 0);
+    let totalInCUP = 0;
+    for (const account of accounts) {
+      const currencyCode = account.currency?.code;
+      if (!currencyCode) {
+        throw new BadRequestException(
+          `La cuenta ${account.accountName} no tiene moneda asociada.`,
+        );
+      }
+
+      const convertedAmount = await this.conversionService.calculateExchange(
+        account.totalBalance,
+        currencyCode,
+        "CUP",
+      );
+
+      totalInCUP += convertedAmount;
+    }
+
+    return parseFloat(totalInCUP.toFixed(2));
   }
 
   async getBalanceByAccountType(): Promise<Record<string, number>> {

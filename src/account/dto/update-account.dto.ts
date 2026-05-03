@@ -13,7 +13,7 @@ export class UpdateAccountDto {
 
   @IsInt()
   @ApiProperty({ description: "ID de la moneda (Currency)", required: true })
-  currencyId: number;
+  currencyId?: number;
 
   @IsEnum(AccountStorageType)
   @ApiProperty({
@@ -29,5 +29,5 @@ export class UpdateAccountDto {
     description: "Monto inicial de la cuenta",
     required: true,
   })
-  initialBalance: number;
+  initialBalance?: number;
 }

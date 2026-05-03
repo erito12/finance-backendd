@@ -15,7 +15,6 @@ import { CreateAccountDto } from "./dto/create-account.dto";
 
 import { AccountEntity } from "../entities/account.entity";
 import { ExchangeMoneyDto } from "../common/dto/ExchangeMoney.dto";
-import { CoinsType } from "../common/interface/coin-type.interface";
 
 @Controller("account")
 export class AccountController {
@@ -37,7 +36,7 @@ export class AccountController {
   }
 
   @Get("total-amount-per-account")
-  async getTotalBalancePerAccount(): Promise<Record<CoinsType, number>> {
+  async getTotalBalancePerAccount(): Promise<Record<string, number>> {
     return this.accountService.getBalanceByAccountType();
   }
 
