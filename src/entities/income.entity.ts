@@ -29,7 +29,7 @@ export class Income {
   @Column({ name: "account_id" })
   @IsNotEmpty()
   @IsNumber()
-  account_id: number;
+  accountId: number;
 
   @ManyToOne(() => AccountEntity, (account) => account.incomes, {
     onDelete: "CASCADE",

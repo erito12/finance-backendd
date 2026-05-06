@@ -21,7 +21,7 @@ export class IncomeService {
 
   async create(createIncomeDto: CreateIncomeDto): Promise<Income> {
     const accountExists = await this.accountService.getById(
-      createIncomeDto.account_id,
+      createIncomeDto.accountId,
     );
     if (!accountExists) {
       throw new BadRequestException(
@@ -49,7 +49,7 @@ export class IncomeService {
     const saveIncome = await this.incomeRepository.save(newIncome);
 
     await this.accountService.updateAccountAmount(
-      createIncomeDto.account_id,
+      createIncomeDto.accountId,
       createIncomeDto.income_amount,
       false,
     );
@@ -69,7 +69,7 @@ export class IncomeService {
       availableYears: number[];
     };
   }> {
-    const { month, account_id, year, limit = 10, page = 1 } = filterDto;
+    const { month, accountId, year, limit = 10, page = 1 } = filterDto;
 
     // Obtener años disponibles
     const availableYears = await this.getAvailableYears();
@@ -119,8 +119,8 @@ export class IncomeService {
       );
     }
     //Filtrar por id
-    if (account_id) {
-      queryBuilder.andWhere("income.account_id = :account_id", { account_id });
+    if (accountId) {
+      queryBuilder.andWhere("income.accountId = :accountId", { accountId });
     }
     // Contar el total de registros
     const totalItems = await queryBuilder.getCount();
@@ -131,9 +131,11 @@ export class IncomeService {
       .take(limit)
       .select([
         "income",
-        "account.account_id",
-        "account.account_name",
-        "account.account_type",
+        "account.accountId",
+        "account.accountName",
+        "account.storageType",
+        "account.initialBalance",
+        "account.totalBalance",
       ])
 
       .getMany();
@@ -172,7 +174,7 @@ export class IncomeService {
 
       // 1. Actualizar Cuenta Física
       await this.accountService.updateAccountAmount(
-        existingIncome.account_id,
+        existingIncome.accountId,
         Math.abs(amountChange),
         amountChange < 0, // Si el cambio es negativo (el ingreso bajó), restamos de la cuenta
       );
@@ -193,7 +195,7 @@ export class IncomeService {
       throw new BadRequestException("Ingreso no encontrado.");
     }
 
-    const accountId = existingIncome.account_id;
+    const accountId = existingIncome.accountId;
     const incomeAmount = existingIncome.income_amount;
 
     //Eliminar ingreso
@@ -213,7 +215,7 @@ export class IncomeService {
     //Recorrer cada ingreso y actualizar las cuentas correspondientes
     for (const income of allIncomes) {
       //Obtener el ID de la cuenta asociada ingreso y monto
-      const accountId = income.account_id;
+      const accountId = income.accountId;
       const amount = income.income_amount;
 
       //Llamar a la funcion de Actualizar el monto de la cuenta

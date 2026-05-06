@@ -26,5 +26,5 @@ export class CreateIncomeDto {
     example: 1,
     description: "Introducir el id de la cuenta",
   })
-  account_id: number;
+  accountId: number;
 }

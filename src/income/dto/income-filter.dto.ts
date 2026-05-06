@@ -23,5 +23,5 @@ export class IncomeFilterDto extends FilterDto {
   @IsOptional()
   @IsInt()
   @IsPositive()
-  account_id?: number;
+  accountId?: number;
 }

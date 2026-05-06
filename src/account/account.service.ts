@@ -77,36 +77,34 @@ export class AccountService {
     id: number,
     updateAccountDto: UpdateAccountDto,
   ): Promise<AccountEntity | null> {
-    // 1. Usamos preload para buscar la entidad y aplicar los cambios del DTO en un solo paso
+    // 1. Separamos currencyId del resto de los datos
+    const { currencyId, ...dataToUpdate } = updateAccountDto;
+
+    // 2. Usamos preload con los nombres de propiedades de tus clases (CamelCase)
     const account = await this.accountRepository.preload({
-      accountId: id,
-      ...updateAccountDto,
-      // Mapeamos manualmente la relación si viene en el DTO
-      currency: updateAccountDto.currencyId
-        ? { currencyId: updateAccountDto.currencyId }
-        : undefined,
+      accountId: Number(id),
+      ...dataToUpdate,
+      // Cambiamos 'currency_id' por 'currencyId' para que coincida con tu Entidad
+      currency: currencyId ? { currencyId: currencyId } : undefined,
     });
 
-    // 2. Si no devuelve nada, la cuenta no existe en la BD
     if (!account) {
       throw new BadRequestException(
         "No existe la cuenta que desea actualizar.",
       );
     }
 
-    // 3. Validación de moneda (solo si se intentó cambiar)
-    if (updateAccountDto.currencyId) {
+    // 3. Validación de moneda usando el nombre de propiedad de la clase
+    if (currencyId) {
       const currencyExists = await this.currencyRepository.findOneBy({
-        currencyId: updateAccountDto.currencyId,
+        currencyId: currencyId, // También aquí debe ser CamelCase
       });
+
       if (!currencyExists) {
-        throw new BadRequestException("La moneda especificada no existe.", {
-          description: "No se encontró ninguna moneda con ese ID",
-        });
+        throw new BadRequestException("La moneda especificada no existe.");
       }
     }
 
-    // 4. Guardamos la entidad ya actualizada (esto disparará validaciones y listeners)
     return this.accountRepository.save(account);
   }
 
