@@ -8,7 +8,7 @@ import {
   PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from "typeorm";
-import { Income } from "./income.entity";
+import { IncomeEntity } from "./income.entity";
 import { Expense } from "./expense.entity";
 import { CurrencyEntity } from "./currency.entity";
 import { AccountStorageType } from "../common/enum/AccountStorageType";
@@ -60,8 +60,8 @@ export class AccountEntity {
   })
   totalBalance: number;
 
-  @OneToMany(() => Income, (income) => income.account)
-  incomes: Income[];
+  @OneToMany(() => IncomeEntity, (income) => income.account)
+  incomes: IncomeEntity[];
 
   @OneToMany(() => Expense, (expense) => expense.account)
   expenses: Expense[];

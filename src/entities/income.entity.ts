@@ -4,27 +4,29 @@ import {
   PrimaryGeneratedColumn,
   ManyToOne,
   JoinColumn,
+  OneToMany,
 } from "typeorm";
 import { AccountEntity } from "./account.entity";
 import { IsNotEmpty, IsNumber } from "class-validator";
 import { IncomeType } from "../income/interfaces/income.interface";
+import { IncomeDistributionEntity } from "./income-distribution.entity";
 
 @Entity()
-export class Income {
+export class IncomeEntity {
   @PrimaryGeneratedColumn()
-  income_id: number;
+  incomeId: number;
 
   @Column({ type: "date", default: () => "CURRENT_DATE" })
-  income_date: Date;
+  incomeDate: Date;
 
   @Column({ type: "varchar" })
-  income_type: IncomeType;
+  incomeType: IncomeType;
 
   @Column({ type: "numeric" })
-  income_amount: number;
+  incomeAmount: number;
 
   @Column({ type: "varchar" })
-  income_details: string;
+  incomeDetail: string;
 
   @Column({ name: "account_id" })
   @IsNotEmpty()
@@ -36,4 +38,9 @@ export class Income {
   })
   @JoinColumn({ name: "account_id" })
   account: AccountEntity;
+
+  @OneToMany(() => IncomeDistributionEntity, (dist) => dist.income, {
+    cascade: true,
+  })
+  distributions: IncomeDistributionEntity[];
 }

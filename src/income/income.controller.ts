@@ -10,11 +10,12 @@ import {
   HttpStatus,
   Query,
   Logger,
+  NotFoundException,
 } from "@nestjs/common";
 import { IncomeService } from "./income.service";
 import { UpdateIncomeDto } from "./dto/update-income.dto";
 import { CreateIncomeDto } from "./dto/create-income.dto";
-import { Income } from "../entities/income.entity";
+import { IncomeEntity } from "../entities/income.entity";
 import { IncomeFilterDto } from "./dto/income-filter.dto";
 import { ApiOperation, ApiResponse } from "@nestjs/swagger";
 
@@ -24,25 +25,33 @@ export class IncomeController {
   constructor(private readonly incomeService: IncomeService) {}
 
   @Post()
+  @ApiOperation({ summary: "Crear un nuevo ingreso con distribución opcional" })
+  @ApiResponse({
+    status: 201,
+    description: "Ingreso creado y saldos actualizados",
+  })
   async create(@Body() createIncomeDto: CreateIncomeDto) {
-    return this.incomeService.create(createIncomeDto);
+    try {
+      this.logger.log(
+        `Creando nuevo ingreso por valor de: ${createIncomeDto.incomeAmount}`,
+      );
+      return await this.incomeService.create(createIncomeDto);
+    } catch (error: any) {
+      // Si el servicio lanza BadRequestException, NestJS lo manejará solo.
+      // Pero si es un error inesperado, lo capturamos aquí.
+      this.logger.error(`Error al crear ingreso: ${error.message}`);
+      throw error;
+    }
   }
 
   @Get()
   @ApiResponse({
     status: 200,
     description: "Lista de ingresos obtenida exitosamente",
-    type: [Income],
+    type: [IncomeEntity],
   })
-  @ApiResponse({ status: 404, description: "No se encontraron ingresos" })
-  async getIncomes(@Query() filterDto: IncomeFilterDto): Promise<{
-    data: Income[];
-    meta: {
-      totalItems: number;
-      limit: number;
-      page: number;
-    };
-  }> {
+  async getIncomes(@Query() filterDto: IncomeFilterDto) {
+    // Nota: El servicio ya devuelve el objeto con data y meta
     return this.incomeService.findAll(filterDto);
   }
 
@@ -50,41 +59,12 @@ export class IncomeController {
   async findOne(@Param("id") id: number) {
     const income = await this.incomeService.getById(id);
     if (!income) {
-      throw new HttpException("Income not found", HttpStatus.NOT_FOUND);
+      throw new HttpException("Ingreso no encontrado", HttpStatus.NOT_FOUND);
     }
     return income;
   }
 
   @Get("available-years")
-  @ApiOperation({
-    summary: "Obtener años con datos disponibles",
-    description:
-      "Devuelve una lista de años únicos para los cuales existen registros de ingresos en la base de datos. Incluye automáticamente el año actual.",
-  })
-  @ApiResponse({
-    status: 200,
-    description: "Lista de años obtenida exitosamente",
-    schema: {
-      example: {
-        success: true,
-        message: "Años disponibles obtenidos",
-        data: [2026, 2025, 2024, 2023],
-        timestamp: "2026-01-28T12:00:00.000Z",
-      },
-    },
-  })
-  @ApiResponse({
-    status: 500,
-    description: "Error interno del servidor",
-    schema: {
-      example: {
-        success: false,
-        message: "Error al obtener años disponibles",
-        error: "Error detail here",
-        timestamp: "2026-01-28T12:00:00.000Z",
-      },
-    },
-  })
   async getAvailableYears() {
     try {
       this.logger.log("📞 Solicitando años disponibles...");
@@ -99,20 +79,27 @@ export class IncomeController {
         data: years,
         timestamp: new Date().toISOString(),
       };
-    } catch (error) {
+    } catch (error: unknown) {
+      // 1. Cambiamos 'any' por 'unknown'
+
+      // 2. Extraemos el mensaje de forma segura
+      const errorMessage =
+        error instanceof Error ? error.message : "Error desconocido";
+      const errorStack = error instanceof Error ? error.stack : undefined;
+
       this.logger.error(
-        `❌ Error en getAvailableYears: ${error.message}`,
-        error.stack,
+        `❌ Error en getAvailableYears: ${errorMessage}`,
+        errorStack,
       );
+
+      // 3. Verificamos el entorno de forma segura
+      const isDevelopment = process.env.NODE_ENV === "development";
 
       throw new HttpException(
         {
           success: false,
           message: "Error al obtener años disponibles",
-          error:
-            process.env.NODE_ENV === "development"
-              ? error.message
-              : "Error interno",
+          error: isDevelopment ? errorMessage : "Error interno",
           timestamp: new Date().toISOString(),
         },
         HttpStatus.INTERNAL_SERVER_ERROR,
@@ -130,27 +117,51 @@ export class IncomeController {
       updateIncomeDto,
     );
     if (!updatedIncome) {
-      throw new HttpException("Income not found", HttpStatus.NOT_FOUND);
+      throw new HttpException(
+        "No se pudo encontrar el ingreso para actualizar",
+        HttpStatus.NOT_FOUND,
+      );
     }
     return updatedIncome;
   }
 
   @Delete(":id")
+  @ApiOperation({ summary: "Eliminar un ingreso y revertir saldos" })
   async removeById(@Param("id") id: number) {
-    const income = await this.incomeService.getById(id);
-    if (!income) {
-      throw new HttpException("No existe el ingreso", HttpStatus.NOT_FOUND);
+    try {
+      this.logger.log(`Solicitud para eliminar ingreso ID: ${id}`);
+      // El servicio ahora maneja la reversión de saldos en la transacción
+      await this.incomeService.removeById(id);
+
+      return {
+        success: true,
+        message: `El ingreso ${id} y sus distribuciones han sido eliminados. Saldos revertidos.`,
+      };
+    } catch (error: any) {
+      if (error instanceof NotFoundException) throw error;
+
+      this.logger.error(`Error eliminando ingreso ${id}: ${error.message}`);
+      throw new HttpException(
+        "Error al procesar la eliminación del ingreso",
+        HttpStatus.INTERNAL_SERVER_ERROR,
+      );
     }
-    return this.incomeService.removeById(id);
   }
 
   @Delete()
+  @ApiOperation({
+    summary: "Eliminar todos los ingresos (Cuidado: Acción Crítica)",
+  })
   async removeAll() {
+    this.logger.warn(
+      "⚠️ Se ha solicitado la eliminación de TODOS los registros de ingresos.",
+    );
     await this.incomeService.removeAll();
 
-    // Como clear() no devuelve un objeto con "affected", puedes omitir esta verificación
     return {
-      message: "Todos los ingresos han sido eliminados exitosamente.",
+      success: true,
+      message:
+        "Todos los ingresos han sido eliminados y los saldos de cuenta actualizados.",
     };
   }
 }

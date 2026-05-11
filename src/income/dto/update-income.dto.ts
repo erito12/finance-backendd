@@ -14,10 +14,11 @@ export class UpdateIncomeDto {
     description: "Monto del ingreso.",
     required: false,
   })
-  income_amount?: number;
+  incomeAmount?: number;
+
   @ApiProperty({
     example: "Pago del mes de actual",
     description: "Detalles del Ingreso",
   })
-  income_details: string;
+  incomeDetails: string;
 }

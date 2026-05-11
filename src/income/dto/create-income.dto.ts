@@ -1,6 +1,6 @@
 import { ApiProperty } from "@nestjs/swagger";
 import { IncomeType } from "../interfaces/income.interface";
-import { IsNotEmpty, IsNumber } from "class-validator";
+import { IsArray, IsNotEmpty, IsNumber, IsOptional } from "class-validator";
 
 export class CreateIncomeDto {
   @ApiProperty({
@@ -12,13 +12,13 @@ export class CreateIncomeDto {
     example: "Pago del mes de actual",
     description: "Detalles del Ingreso",
   })
-  income_details: string;
+  incomeDetails: string;
 
   @ApiProperty({
     example: 1000,
     description: "Monto del ingreso.",
   })
-  income_amount: number;
+  incomeAmount: number;
 
   @IsNotEmpty()
   @IsNumber()
@@ -27,4 +27,15 @@ export class CreateIncomeDto {
     description: "Introducir el id de la cuenta",
   })
   accountId: number;
+
+  @IsOptional()
+  @IsArray()
+  @ApiProperty({
+    example: [
+      { purposeId: 1, percentage: 50 },
+      { purposeId: 2, percentage: 50 },
+    ],
+    description: "Distribución dinámica para este ingreso",
+  })
+  distributions?: { purposeId: number; percentage: number }[];
 }

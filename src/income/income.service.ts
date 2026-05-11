@@ -1,67 +1,127 @@
-import { BadRequestException, Injectable } from "@nestjs/common";
+import {
+  BadRequestException,
+  Injectable,
+  NotFoundException,
+} from "@nestjs/common";
 import { InjectRepository } from "@nestjs/typeorm";
-import { Repository } from "typeorm";
+import { DataSource, Repository } from "typeorm";
 
 import { UpdateIncomeDto } from "./dto/update-income.dto";
 
 import { CreateIncomeDto } from "./dto/create-income.dto";
 import { IncomeFilterDto } from "./dto/income-filter.dto";
-import { Income } from "../entities/income.entity";
+import { IncomeEntity } from "../entities/income.entity";
 import { AccountService } from "../account/account.service";
 import { PurposeService } from "../purpose/purpose.service";
+import { PurposeEntity } from "../entities/purpose.entity";
+import { IncomeDistributionEntity } from "../entities/income-distribution.entity";
 
 @Injectable()
 export class IncomeService {
   constructor(
-    @InjectRepository(Income)
-    private incomeRepository: Repository<Income>,
+    @InjectRepository(IncomeEntity)
+    private incomeRepository: Repository<IncomeEntity>,
     private accountService: AccountService,
     private purposeService: PurposeService,
+    private dataSource: DataSource,
   ) {}
 
-  async create(createIncomeDto: CreateIncomeDto): Promise<Income> {
-    const accountExists = await this.accountService.getById(
-      createIncomeDto.accountId,
-    );
-    if (!accountExists) {
-      throw new BadRequestException(
-        "La cuenta con el ID proporcionado no existe.",
+  async create(createIncomeDto: CreateIncomeDto): Promise<IncomeEntity> {
+    const queryRunner = this.dataSource.createQueryRunner();
+    await queryRunner.connect();
+    await queryRunner.startTransaction();
+
+    try {
+      // 1. Validar Cuenta
+      const accountExists = await this.accountService.getById(
+        createIncomeDto.accountId,
       );
+      if (!accountExists) {
+        throw new BadRequestException("La cuenta no existe.");
+      }
+
+      // 2. Crear el objeto Ingreso
+      const newIncome = queryRunner.manager.create(IncomeEntity, {
+        incomeAmount: createIncomeDto.incomeAmount,
+        incomeDetail: createIncomeDto.incomeDetails,
+        incomeType: createIncomeDto.income_type,
+        accountId: createIncomeDto.accountId,
+      });
+
+      const savedIncome = await queryRunner.manager.save(newIncome);
+
+      // 3. Procesar Distribución Dinámica
+      if (
+        createIncomeDto.distributions &&
+        createIncomeDto.distributions.length > 0
+      ) {
+        let totalPercentage = 0;
+
+        for (const dist of createIncomeDto.distributions) {
+          // Validar que cada dist tenga los datos necesarios para evitar "unsafe assignment"
+          const pId = Number(dist.purposeId);
+          const pPercentage = Number(dist.percentage);
+
+          const amountToDistribute =
+            (createIncomeDto.incomeAmount * pPercentage) / 100;
+          totalPercentage += pPercentage;
+
+          // Crear registro en la tabla intermedia
+          // Nota: Asegúrate de que en IncomeDistributionEntity la relación sea 'purpose'
+          const distribution = queryRunner.manager.create(
+            IncomeDistributionEntity,
+            {
+              income: savedIncome,
+              purpose: { purpose_id: pId } as PurposeEntity, // Usamos la clave correcta: purpose_id
+              amount: amountToDistribute,
+            },
+          );
+          await queryRunner.manager.save(distribution);
+
+          // Actualizar saldo del Propósito (Atómico)
+          // CRÍTICO: Usar los nombres de propiedad definidos en PurposeEntity
+          await queryRunner.manager.increment(
+            PurposeEntity,
+            { purpose_id: pId }, // Tu entidad usa purpose_id
+            "purpose_balance", // Tu entidad usa purpose_balance
+            amountToDistribute,
+          );
+        }
+
+        if (totalPercentage > 100) {
+          // Hacemos el rollback manual antes de lanzar la excepción para estar seguros
+          throw new BadRequestException(
+            "El porcentaje total no puede superar el 100%",
+          );
+        }
+      }
+
+      // 4. Actualizar saldo de la cuenta bancaria
+      await this.accountService.updateAccountAmount(
+        createIncomeDto.accountId,
+        createIncomeDto.incomeAmount,
+        false,
+      );
+
+      // 5. Confirmar Transacción
+      await queryRunner.commitTransaction();
+      return savedIncome;
+    } catch (err: unknown) {
+      // Si algo falla, deshacemos todo
+      await queryRunner.rollbackTransaction();
+
+      if (err instanceof BadRequestException) throw err;
+
+      const message = err instanceof Error ? err.message : "Error desconocido";
+      throw new BadRequestException(`No se pudo crear el ingreso: ${message}`);
+    } finally {
+      // Siempre liberar el queryRunner
+      await queryRunner.release();
     }
-
-    // Validaciones
-    if (!createIncomeDto.income_amount) {
-      throw new BadRequestException("La cantidad es requerida.");
-    }
-    if (!createIncomeDto.income_details) {
-      throw new BadRequestException("Los detalles son necesarios.");
-    }
-    if (!createIncomeDto.income_type) {
-      throw new BadRequestException("El tipo de ingreso es necesario.");
-    }
-
-    // Crear el ingreso
-    const newIncome = this.incomeRepository.create({
-      ...createIncomeDto,
-      account: accountExists,
-    });
-
-    const saveIncome = await this.incomeRepository.save(newIncome);
-
-    await this.accountService.updateAccountAmount(
-      createIncomeDto.accountId,
-      createIncomeDto.income_amount,
-      false,
-    );
-
-    // 2. NUEVO: Distribuir en los propósitos
-    await this.purposeService.distributeIncome(createIncomeDto.income_amount);
-
-    return this.incomeRepository.save(saveIncome);
   }
 
   async findAll(filterDto: IncomeFilterDto): Promise<{
-    data: Income[];
+    data: IncomeEntity[];
     meta: {
       totalItems: number;
       limit: number;
@@ -151,9 +211,9 @@ export class IncomeService {
     };
   }
 
-  async getById(income_id: number): Promise<Income | null> {
+  async getById(incomeId: number): Promise<IncomeEntity | null> {
     return this.incomeRepository.findOne({
-      where: { income_id },
+      where: { incomeId },
       relations: ["account"],
     });
   }
@@ -161,16 +221,16 @@ export class IncomeService {
   async partialUpdate(
     id: number,
     updateIncomeDto: UpdateIncomeDto,
-  ): Promise<Income | null> {
+  ): Promise<IncomeEntity | null> {
     const existingIncome = await this.getById(id);
     if (!existingIncome) return null;
 
     if (
-      updateIncomeDto.income_amount !== undefined &&
-      updateIncomeDto.income_amount !== existingIncome.income_amount
+      updateIncomeDto.incomeAmount !== undefined &&
+      updateIncomeDto.incomeAmount !== existingIncome.incomeAmount
     ) {
       const amountChange =
-        updateIncomeDto.income_amount - existingIncome.income_amount;
+        updateIncomeDto.incomeAmount - existingIncome.incomeAmount;
 
       // 1. Actualizar Cuenta Física
       await this.accountService.updateAccountAmount(
@@ -189,26 +249,68 @@ export class IncomeService {
   }
 
   async removeById(id: number): Promise<void> {
-    const existingIncome = await this.getById(id);
+    const queryRunner = this.dataSource.createQueryRunner();
+    await queryRunner.connect();
+    await queryRunner.startTransaction();
 
-    if (!existingIncome) {
-      throw new BadRequestException("Ingreso no encontrado.");
+    try {
+      // 1. Buscamos el ingreso con sus distribuciones
+      // Importante: El nombre de la relación debe coincidir con tu entidad IncomeEntity
+      const income = await queryRunner.manager.findOne(IncomeEntity, {
+        where: { incomeId: id },
+        relations: ["distributions", "distributions.purpose"],
+      });
+
+      if (!income) {
+        throw new NotFoundException(`El ingreso con ID ${id} no existe.`);
+      }
+
+      // 2. Revertir saldos en los Propósitos vinculados
+      if (income.distributions && income.distributions.length > 0) {
+        for (const dist of income.distributions) {
+          // Accedemos a los campos correctos de tu PurposeEntity
+          // Usamos el ID del propósito que viene en la relación cargada
+          const pId = dist.purpose.purpose_id;
+          const amountToSubtract = Number(dist.amount);
+
+          await queryRunner.manager.decrement(
+            PurposeEntity,
+            { purpose_id: pId },
+            "purpose_balance", // Nombre exacto en tu PurposeEntity
+            amountToSubtract,
+          );
+        }
+      }
+
+      // 3. Revertir saldo en la Cuenta bancaria
+      // El tercer parámetro 'true' indica que es una resta (para anular el ingreso)
+      await this.accountService.updateAccountAmount(
+        income.accountId,
+        income.incomeAmount,
+        true,
+      );
+
+      // 4. Eliminar el ingreso
+      // Si en IncomeEntity tienes @OneToMany(..., { cascade: true }),
+      // TypeORM borrará automáticamente las filas en IncomeDistributionEntity.
+      await queryRunner.manager.remove(income);
+
+      await queryRunner.commitTransaction();
+    } catch (err: unknown) {
+      // Revertimos todos los cambios si algo falla
+      await queryRunner.rollbackTransaction();
+
+      if (err instanceof NotFoundException) throw err;
+
+      const message = err instanceof Error ? err.message : "Error desconocido";
+      throw new BadRequestException(
+        `No se pudo eliminar el ingreso: ${message}`,
+      );
+    } finally {
+      // Siempre liberamos el queryRunner para evitar fugas de memoria
+      await queryRunner.release();
     }
-
-    const accountId = existingIncome.accountId;
-    const incomeAmount = existingIncome.income_amount;
-
-    //Eliminar ingreso
-    await this.incomeRepository.delete(id);
-    //Actualizar monto dela cuenta
-
-    await this.accountService.updateAccountAmount(
-      accountId,
-      incomeAmount,
-      true,
-    );
   }
-
   async removeAll() {
     //Obtener todas los Ingresos
     const allIncomes = await this.incomeRepository.find();
@@ -216,7 +318,7 @@ export class IncomeService {
     for (const income of allIncomes) {
       //Obtener el ID de la cuenta asociada ingreso y monto
       const accountId = income.accountId;
-      const amount = income.income_amount;
+      const amount = income.incomeAmount;
 
       //Llamar a la funcion de Actualizar el monto de la cuenta
       await this.accountService.updateAccountAmount(accountId, amount, true);

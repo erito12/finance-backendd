@@ -1,4 +1,8 @@
-import { BadRequestException, Injectable } from "@nestjs/common";
+import {
+  BadRequestException,
+  Injectable,
+  NotFoundException,
+} from "@nestjs/common";
 import { InjectRepository } from "@nestjs/typeorm";
 import { PurposeEntity } from "../entities/purpose.entity";
 import { Repository } from "typeorm";
@@ -21,11 +25,7 @@ export class PurposeService {
     }
 
     // 2. Validación de rango individual (0-100)
-    if (
-      createPurposeDto.purpose_percentage === undefined ||
-      createPurposeDto.purpose_percentage > 100 ||
-      createPurposeDto.purpose_percentage < 0
-    ) {
+    if (createPurposeDto.purpose_percentage > 100) {
       throw new BadRequestException("El porcentaje debe estar entre 0 y 100");
     }
 
@@ -130,19 +130,30 @@ export class PurposeService {
     }
   }
 
-  async updateBalance(id: number, amount: number): Promise<void> {
-    const purpose = await this.getById(id);
-    if (!purpose) throw new BadRequestException("Propósito no encontrado");
+  // async updateBalance(id: number, amount: number): Promise<void> {
+  //   const purpose = await this.getById(id);
+  //   if (!purpose) throw new BadRequestException("Propósito no encontrado");
 
-    purpose.purpose_balance += amount;
+  //   purpose.purpose_balance += amount;
 
-    // Opcional: Validar que no quede en negativo si es un gasto
-    if (purpose.purpose_balance < 0) {
-      // Aquí decides si permites saldo negativo o lanzas error
-      console.warn(
-        `Aviso: El presupuesto ${purpose.purpose_name} está en negativo.`,
-      );
-    }
+  //   // Opcional: Validar que no quede en negativo si es un gasto
+  //   if (purpose.purpose_balance < 0) {
+  //     // Aquí decides si permites saldo negativo o lanzas error
+  //     console.warn(
+  //       `Aviso: El presupuesto ${purpose.purpose_name} está en negativo.`,
+  //     );
+  //   }
+
+  //   await this.purposeRepository.save(purpose);
+  // }
+
+  async updateBalance(purposeId: number, amount: number): Promise<void> {
+    const purpose = await this.getById(purposeId);
+    if (!purpose)
+      throw new NotFoundException(`Propósito ${purposeId} no encontrado`);
+
+    // Sumamos el monto al saldo actual
+    purpose.purpose_balance = Number(purpose.purpose_balance) + Number(amount);
 
     await this.purposeRepository.save(purpose);
   }

@@ -14,58 +14,74 @@ export class ScrapingService {
     private readonly currencyRepository: Repository<CurrencyEntity>,
   ) {}
 
-  //actualiza las tasas de cambio cada día a las 12:00 am
   @Cron(CronExpression.EVERY_DAY_AT_MIDNIGHT)
   async handleDailyScraping() {
-    this.logger.log("Iniciando actualización automática de tasas...");
+    this.logger.log("Iniciando actualización automática desde BCC...");
     await this.performScrapeAndSave();
   }
 
-  private async performScrapeAndSave() {
-    // IMPORTANTE: En Linux/Ubuntu, añade estos argumentos para evitar errores de permisos
+  async performScrapeAndSave() {
     const browser = await puppeteer.launch({
-      headless: true,
-      args: ["--no-sandbox", "--disable-setuid-sandbox"],
+      headless: true, // Cambia a false si quieres ver qué hace el navegador en desarrollo
+      args: [
+        "--no-sandbox",
+        "--disable-setuid-sandbox",
+        "--disable-web-security",
+        "--ignore-certificate-errors",
+        "--ignore-certificate-errors-spki-list",
+      ],
     });
 
     const page = await browser.newPage();
 
+    // Configurar un User-Agent real para evitar bloqueos por "No autorizado"
+    await page.setUserAgent(
+      "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
+    );
+
     try {
-      // Vamos directamente a la página de tasas para evitar distracciones
-      await page.goto("https://eltoque.com/", { waitUntil: "networkidle2" });
+      // Cargamos la página
+      await page.goto("https://www.bc.gob.cu/", {
+        waitUntil: "domcontentloaded",
+        timeout: 90000,
+      });
 
-      // LOG DE DEPURACIÓN: Vamos a ver qué códigos encuentra realmente
+      // Esperamos a que la tabla de tasas sea visible
+      await page.waitForSelector("table", { timeout: 20000 });
+
       const rates = await page.evaluate(() => {
-        const data = {};
-        // El Toque actual suele usar un selector basado en el texto de las filas
-        // Intentamos un selector más genérico que busque el código y el precio
-        const items = document.querySelectorAll("tr, .rate-item"); // Ajustar según inspección
+        const data: Record<string, number> = {};
+        // El BCC usa tablas; buscamos la que tenga info de moneda
+        const rows = Array.from(document.querySelectorAll("table tr"));
 
-        items.forEach((item) => {
-          const htmlItem = item as HTMLElement;
-          const text = htmlItem.innerText || "";
-          // Buscamos patrones como "USD" seguido de un número
-          const match = text.match(/(USD|MLC|EUR|CUP)\s*(\d+)/);
+        rows.forEach((row) => {
+          const cells = row.querySelectorAll("td");
+          if (cells.length >= 2) {
+            const currency = cells[0].innerText.toUpperCase();
+            // Limpiamos el valor: quitamos espacios y cambiamos coma por punto
+            const valueRaw = cells[1].innerText.trim().replace(",", ".");
+            const value = parseFloat(valueRaw);
 
-          if (match) {
-            const code = match[1];
-            const value = parseFloat(match[2]);
-            data[code] = value;
+            if (!isNaN(value) && value > 0) {
+              if (currency.includes("USD")) data["USD"] = value;
+              if (currency.includes("EUR")) data["EUR"] = value;
+              if (currency.includes("CAD")) data["CAD"] = value;
+              if (currency.includes("GBP")) data["GBP"] = value;
+            }
           }
         });
         return data;
       });
 
       if (Object.keys(rates).length === 0) {
-        this.logger.warn(
-          "No se encontraron tasas. El selector podría estar desactualizado.",
-        );
-        return;
+        this.logger.warn("No se encontraron tasas en la tabla del BCC.");
+      } else {
+        this.logger.log(`Tasas extraídas: ${JSON.stringify(rates)}`);
+        await this.updateDatabaseRates(rates);
       }
-
-      await this.updateDatabaseRates(rates);
-    } catch (error: any) {
-      this.logger.error(`Error en scraping: ${error.message}`);
+    } catch (error: unknown) {
+      const msg = error instanceof Error ? error.message : "Error desconocido";
+      this.logger.error(`Error en scraping: ${msg}`);
     } finally {
       await browser.close();
     }
@@ -73,19 +89,18 @@ export class ScrapingService {
 
   private async updateDatabaseRates(rates: Record<string, number>) {
     for (const [code, value] of Object.entries(rates)) {
-      // Solo actualizamos si el valor es mayor que 0
       if (value > 0) {
-        const result = await this.currencyRepository.update(
-          { code: code.toUpperCase() },
-          { exchangeRate: value },
-        );
-
-        if (result.affected && result.affected > 0) {
-          this.logger.log(`✅ ${code}: ${value} CUP`);
-        } else {
-          this.logger.warn(
-            `⚠️ Moneda ${code} no encontrada en la BD (Seed fallido?)`,
+        try {
+          const result = await this.currencyRepository.update(
+            { code: code.toUpperCase() },
+            { exchangeRate: value },
           );
+
+          if (result.affected && result.affected > 0) {
+            this.logger.log(`✅ Actualizado ${code}: ${value} CUP`);
+          }
+        } catch (dbError) {
+          this.logger.error(`Error actualizando ${code} en BD`);
         }
       }
     }
