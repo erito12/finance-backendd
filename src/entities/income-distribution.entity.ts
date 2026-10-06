@@ -8,19 +8,35 @@ import {
 import { IncomeEntity } from "./income.entity";
 import { PurposeEntity } from "./purpose.entity";
 
-// income-distribution.entity.ts
 @Entity()
 export class IncomeDistributionEntity {
   @PrimaryGeneratedColumn()
   id: number;
 
-  @Column({ type: "numeric" })
-  amount: number; // El monto calculado (o el porcentaje)
+  @Column({ type: "numeric", nullable: true })
+  amount: number;
 
-  @ManyToOne(() => IncomeEntity, (income) => income.distributions)
-  income: IncomeEntity;
+  @Column({ type: "numeric", nullable: true })
+  percentage: number;
 
-  @ManyToOne(() => PurposeEntity)
-  @JoinColumn({ name: "purpose_id" }) // nombre en la DB
-  purpose: PurposeEntity; // nombre de la propiedad
+  @Column({ name: "income_id", nullable: true })
+  incomeId: number | null;
+
+  @ManyToOne(() => IncomeEntity, (income) => income.distributions, {
+    onDelete: "CASCADE",
+    nullable: true,
+  })
+  @JoinColumn({ name: "income_id" })
+  income: IncomeEntity | null;
+
+  @Column({ name: "purpose_id", nullable: true })
+  purposeId: number | null;
+
+  @ManyToOne(() => PurposeEntity, {
+    eager: true,
+    onDelete: "CASCADE",
+    nullable: true,
+  })
+  @JoinColumn({ name: "purpose_id" })
+  purpose: PurposeEntity | null;
 }

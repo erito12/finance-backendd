@@ -8,7 +8,7 @@ export class CreatePurposeDto {
     description: " Crear Presupuesto Basado en Porcentaje ",
     required: true,
   })
-  purpose_name: string;
+  purposeName: string;
 
   @IsPositive()
   @IsNumber()
@@ -17,7 +17,7 @@ export class CreatePurposeDto {
     description: "Porciento del presupuesto",
     required: true,
   })
-  purpose_percentage: number;
+  purposePercentage: number;
 
   @IsPositive()
   @IsNumber()
@@ -26,5 +26,5 @@ export class CreatePurposeDto {
     description: "Balance inicial del Presupuesto",
     required: true,
   })
-  purpose_balance: number;
+  purposeBalance: number;
 }

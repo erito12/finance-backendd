@@ -1,4 +1,9 @@
-import { Injectable, OnModuleInit } from "@nestjs/common";
+import {
+  BadRequestException,
+  Injectable,
+  NotFoundException,
+  OnModuleInit,
+} from "@nestjs/common";
 import { InjectRepository } from "@nestjs/typeorm";
 import { Repository } from "typeorm";
 import { CurrencyEntity } from "../entities/currency.entity";
@@ -13,6 +18,33 @@ export class CurrencyService implements OnModuleInit {
 
   async findAll(): Promise<CurrencyEntity[]> {
     return this.currencyRepository.find();
+  }
+
+  async findByCode(code: string): Promise<CurrencyEntity | null> {
+    return this.currencyRepository.findOneBy({ code: code.toUpperCase() });
+  }
+
+  async updateExchangeRate(
+    code: string,
+    exchangeRate: number,
+  ): Promise<CurrencyEntity> {
+    if (!Number.isFinite(exchangeRate) || exchangeRate < 0) {
+      throw new BadRequestException(
+        "El valor de la moneda debe ser un número válido y mayor o igual a 0.",
+      );
+    }
+
+    const normalizedCode = code.toUpperCase();
+    const currency = await this.findByCode(normalizedCode);
+
+    if (!currency) {
+      throw new NotFoundException(
+        `No existe la moneda con el código ${normalizedCode}.`,
+      );
+    }
+
+    currency.exchangeRate = Number(exchangeRate);
+    return this.currencyRepository.save(currency);
   }
 
   //Metodos alternativos para manejar las monedas, como obtener todas las monedas, obtener una moneda por su código, etc. pueden ser añadidos aquí.

@@ -20,22 +20,22 @@ export class PurposeService {
 
   async create(createPurposeDto: CreatePurposeDto): Promise<PurposeEntity> {
     // 1. Validaciones de existencia de campos (ya las tienes)
-    if (!createPurposeDto.purpose_name) {
+    if (!createPurposeDto.purposeName) {
       throw new BadRequestException("El nombre de Presupuesto es requerido.");
     }
 
     // 2. Validación de rango individual (0-100)
-    if (createPurposeDto.purpose_percentage > 100) {
+    if (createPurposeDto.purposePercentage > 100) {
       throw new BadRequestException("El porcentaje debe estar entre 0 y 100");
     }
 
     // 3. LLAMADA A LA VALIDACIÓN DE LÍMITE TOTAL (Esto es lo que te faltaba)
     // Verifica que la suma de todos los propósitos no pase de 100
-    await this.validatePercentageLimit(createPurposeDto.purpose_percentage);
+    await this.validatePercentageLimit(createPurposeDto.purposePercentage);
 
     // 4. Verificar duplicados
     const existPurpose = await this.purposeRepository.findOne({
-      where: { purpose_name: createPurposeDto.purpose_name },
+      where: { purposeName: createPurposeDto.purposeName },
     });
 
     if (existPurpose) {
@@ -45,7 +45,7 @@ export class PurposeService {
     // 5. Crear con balance inicial en 0
     const newPurpose = this.purposeRepository.create({
       ...createPurposeDto,
-      purpose_balance: 0,
+      purposeBalance: 0,
     });
 
     return this.purposeRepository.save(newPurpose);
@@ -61,10 +61,10 @@ export class PurposeService {
     }
 
     // Si se está intentando actualizar el porcentaje, validamos el nuevo total
-    if (updatePurposeDto.purpose_percentage !== undefined) {
+    if (updatePurposeDto.purposePercentage !== undefined) {
       // Pasamos el ID actual para que no se sume a sí mismo en el cálculo
       await this.validatePercentageLimit(
-        updatePurposeDto.purpose_percentage,
+        updatePurposeDto.purposePercentage,
         id,
       );
     }
@@ -73,8 +73,8 @@ export class PurposeService {
     return this.getById(id);
   }
 
-  async getById(purpose_id: number): Promise<PurposeEntity | null> {
-    return this.purposeRepository.findOneBy({ purpose_id });
+  async getById(purposeId: number): Promise<PurposeEntity | null> {
+    return this.purposeRepository.findOneBy({ purposeId });
   }
 
   //Obtener balances por cada propuesta
@@ -82,8 +82,8 @@ export class PurposeService {
     const purposes = await this.findAll();
 
     return purposes.map((purpose) => ({
-      name: purpose.purpose_name,
-      balance: purpose.purpose_balance,
+      name: purpose.purposeName,
+      balance: purpose.purposeBalance,
     }));
   }
 
@@ -106,7 +106,7 @@ export class PurposeService {
   //Metodo para obtener el total de porcentaje
   async getTotalPercentage(): Promise<number> {
     const purposes = await this.findAll();
-    return purposes.reduce((acc, p) => acc + p.purpose_percentage, 0);
+    return purposes.reduce((acc, p) => acc + p.purposePercentage, 0);
   }
 
   private async validatePercentageLimit(
@@ -115,8 +115,8 @@ export class PurposeService {
   ): Promise<void> {
     const purposes = await this.findAll();
     const currentTotal = purposes
-      .filter((p) => p.purpose_id !== excludeId) // Excluir el que estamos editando
-      .reduce((acc, p) => acc + p.purpose_percentage, 0);
+      .filter((p) => p.purposeId !== excludeId) // Excluir el que estamos editando
+      .reduce((acc, p) => acc + p.purposePercentage, 0);
 
     if (currentTotal + newPercentage > 100) {
       const available = 100 - currentTotal;
@@ -153,7 +153,7 @@ export class PurposeService {
       throw new NotFoundException(`Propósito ${purposeId} no encontrado`);
 
     // Sumamos el monto al saldo actual
-    purpose.purpose_balance = Number(purpose.purpose_balance) + Number(amount);
+    purpose.purposeBalance = Number(purpose.purposeBalance) + Number(amount);
 
     await this.purposeRepository.save(purpose);
   }
@@ -162,8 +162,8 @@ export class PurposeService {
     const purposes = await this.findAll();
 
     for (const purpose of purposes) {
-      const amountToAssign = (totalAmount * purpose.purpose_percentage) / 100;
-      await this.updateBalance(purpose.purpose_id, amountToAssign);
+      const amountToAssign = (totalAmount * purpose.purposePercentage) / 100;
+      await this.updateBalance(purpose.purposeId, amountToAssign);
     }
   }
 
@@ -185,8 +185,8 @@ export class PurposeService {
 
     // A partir de aquí, para TS, 'source' y 'target' ya NO son null, son 'Account'.
     this.validateExchange(source, target, amount);
-    source.purpose_balance -= amount;
-    target.purpose_balance += amount;
+    source.purposeBalance -= amount;
+    target.purposeBalance += amount;
 
     await this.purposeRepository.save([source, target]);
 
@@ -204,7 +204,7 @@ export class PurposeService {
     if (!source || !target)
       throw new BadRequestException("Cuentas no encontradas");
     if (amount <= 0) throw new BadRequestException("Monto inválido");
-    if (source.purpose_balance < amount)
+    if (source.purposeBalance < amount)
       throw new BadRequestException("Saldo insuficiente");
   }
 }

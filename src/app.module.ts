@@ -30,7 +30,7 @@ const typeOrmConfig: TypeOrmModuleOptions = {
   port: 5432,
   username: "postgres",
   password: "Erito1234",
-  database: "FinanceBD",
+  database: "financebd",
   // database: " real-finance-database",
   namingStrategy: new SnakeNamingStrategy(),
   entities: [

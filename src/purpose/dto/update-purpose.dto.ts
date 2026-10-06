@@ -8,7 +8,7 @@ export class UpdatePurposeDto {
     description: "Actualizar Presupuesto Basado en Porcentaje",
     required: false,
   })
-  account_name?: string;
+  accountName?: string;
 
   @IsNumber()
   @ApiProperty({
@@ -16,7 +16,7 @@ export class UpdatePurposeDto {
     description: "Añadir cuentas que poseas",
     required: false,
   })
-  purpose_percentage?: number;
+  purposePercentage?: number;
 
   @IsNumber()
   @IsPositive()
@@ -25,5 +25,5 @@ export class UpdatePurposeDto {
     description: "Balance del presupuesto",
     required: false,
   })
-  purpose_balance?: number;
+  purposeBalance?: number;
 }

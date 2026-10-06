@@ -80,11 +80,27 @@ export class AccountService {
     // 1. Separamos currencyId del resto de los datos
     const { currencyId, ...dataToUpdate } = updateAccountDto;
 
-    // 2. Usamos preload con los nombres de propiedades de tus clases (CamelCase)
+    // 2. OBTENER LA CUENTA EXISTENTE para calcular el ajuste
+    const existingAccount = await this.getById(id);
+    if (!existingAccount) {
+      throw new BadRequestException(
+        "No existe la cuenta que desea actualizar.",
+      );
+    }
+
+    // 3. Si se actualiza initialBalance, recalcular totalBalance
+    const updatedData: any = { ...dataToUpdate }; // 👈 Usar any temporalmente
+
+    if (dataToUpdate.initialBalance !== undefined) {
+      const difference =
+        existingAccount.totalBalance - existingAccount.initialBalance;
+      updatedData.totalBalance = dataToUpdate.initialBalance + difference;
+    }
+
+    // 4. Usamos preload con los nombres de propiedades
     const account = await this.accountRepository.preload({
       accountId: Number(id),
-      ...dataToUpdate,
-      // Cambiamos 'currency_id' por 'currencyId' para que coincida con tu Entidad
+      ...updatedData,
       currency: currencyId ? { currencyId: currencyId } : undefined,
     });
 
@@ -94,10 +110,10 @@ export class AccountService {
       );
     }
 
-    // 3. Validación de moneda usando el nombre de propiedad de la clase
+    // 5. Validación de moneda
     if (currencyId) {
       const currencyExists = await this.currencyRepository.findOneBy({
-        currencyId: currencyId, // También aquí debe ser CamelCase
+        currencyId: currencyId,
       });
 
       if (!currencyExists) {
@@ -173,25 +189,29 @@ export class AccountService {
     return parseFloat(totalInCUP.toFixed(2));
   }
 
-  async getBalanceByAccountType(): Promise<Record<string, number>> {
-    const accounts = await this.accountRepository.find();
+  async getBalanceByAccount(): Promise<
+    {
+      accountId: number;
+      accountName: string;
+      currency: string;
+      totalBalance: number;
+    }[]
+  > {
+    const accounts = await this.accountRepository.find({
+      relations: ["currency"],
+    });
+
     if (!accounts.length) {
       throw new BadRequestException("No hay cuentas registradas.");
     }
 
-    const balanceByType: Record<string, number> = {};
-
-    accounts.forEach((account) => {
-      const currencyCode = account.currency?.code || "USD";
-      if (!balanceByType[currencyCode]) {
-        balanceByType[currencyCode] = 0;
-      }
-      balanceByType[currencyCode] += account.totalBalance;
-    });
-
-    return balanceByType;
+    return accounts.map((account) => ({
+      accountId: account.accountId,
+      accountName: account.accountName,
+      currency: account.currency?.code ?? "N/A",
+      totalBalance: account.totalBalance,
+    }));
   }
-
   async exchangeMoney(sourceId: number, targetId: number, amount: number) {
     const source = await this.getById(sourceId);
     const target = await this.getById(targetId);

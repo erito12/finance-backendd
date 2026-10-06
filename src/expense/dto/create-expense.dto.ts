@@ -35,5 +35,5 @@ export class CreateExpenseDto {
     example: 1,
     description: "Introducir el id de la cuenta",
   })
-  purpose_id: number;
+  purposeId: number;
 }

@@ -47,7 +47,7 @@ export class ExpenseService {
 
     // 1. Validar que el propósito existe
     const purposeExists = await this.purposeService.getById(
-      createExpenseDto.purpose_id,
+      createExpenseDto.purposeId,
     );
     if (!purposeExists) {
       throw new BadRequestException(
@@ -56,9 +56,9 @@ export class ExpenseService {
     }
 
     // 2. (Opcional) Validar si hay saldo en ese propósito
-    if (createExpenseDto.expense_amount > purposeExists.purpose_balance) {
+    if (createExpenseDto.expense_amount > purposeExists.purposeBalance) {
       throw new BadRequestException(
-        `Saldo insuficiente en el fondo: ${purposeExists.purpose_name}`,
+        `Saldo insuficiente en el fondo: ${purposeExists.purposeName}`,
       );
     }
     //Guardar Gasto
@@ -78,7 +78,7 @@ export class ExpenseService {
 
     // 4. NUEVO: Restar del balance del propósito
     await this.purposeService.updateBalance(
-      createExpenseDto.purpose_id,
+      createExpenseDto.purposeId,
       -createExpenseDto.expense_amount, // Pasamos negativo para restar
     );
 
@@ -170,14 +170,14 @@ export class ExpenseService {
       // Actualizar Propósito (Dinero lógico)
       // Usamos el propósito que ya tiene el gasto (o el nuevo si se cambió)
       const targetPurposeId =
-        updateExpenseDto.purpose_id || existingExpense.purpose_id;
+        updateExpenseDto.purpose_id || existingExpense.purposeId;
       await this.purposeService.updateBalance(targetPurposeId, -amountChange);
     }
 
     // 2. Manejar cambio de propósito (Mover el gasto de una bolsa a otra)
     if (
       updateExpenseDto.purpose_id &&
-      updateExpenseDto.purpose_id !== existingExpense.purpose_id
+      updateExpenseDto.purpose_id !== existingExpense.purposeId
     ) {
       // Si NO cambió el monto, solo movemos el total del gasto entre propósitos
       if (
@@ -185,7 +185,7 @@ export class ExpenseService {
         updateExpenseDto.expense_amount === existingExpense.expense_amount
       ) {
         await this.purposeService.updateBalance(
-          existingExpense.purpose_id,
+          existingExpense.purposeId,
           existingExpense.expense_amount,
         ); // Devolvemos al viejo
         await this.purposeService.updateBalance(

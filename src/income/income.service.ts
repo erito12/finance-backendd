@@ -32,7 +32,6 @@ export class IncomeService {
     await queryRunner.startTransaction();
 
     try {
-      // 1. Validar Cuenta
       const accountExists = await this.accountService.getById(
         createIncomeDto.accountId,
       );
@@ -40,82 +39,144 @@ export class IncomeService {
         throw new BadRequestException("La cuenta no existe.");
       }
 
-      // 2. Crear el objeto Ingreso
+      const allocationMode = createIncomeDto.allocationMode ?? "percentage";
+      const totalIncome = Number(createIncomeDto.incomeAmount);
+
+      if (!Number.isFinite(totalIncome) || totalIncome <= 0) {
+        throw new BadRequestException("El monto del ingreso debe ser válido.");
+      }
+
       const newIncome = queryRunner.manager.create(IncomeEntity, {
-        incomeAmount: createIncomeDto.incomeAmount,
+        incomeAmount: totalIncome,
         incomeDetail: createIncomeDto.incomeDetails,
-        incomeType: createIncomeDto.income_type,
-        accountId: createIncomeDto.accountId,
+        incomeType: createIncomeDto.incomeType,
+        account: accountExists,
       });
 
       const savedIncome = await queryRunner.manager.save(newIncome);
 
-      // 3. Procesar Distribución Dinámica
-      if (
-        createIncomeDto.distributions &&
-        createIncomeDto.distributions.length > 0
-      ) {
-        let totalPercentage = 0;
+      if (createIncomeDto.distributions?.length) {
+        let totalAssigned = 0;
 
         for (const dist of createIncomeDto.distributions) {
-          // Validar que cada dist tenga los datos necesarios para evitar "unsafe assignment"
-          const pId = Number(dist.purposeId);
-          const pPercentage = Number(dist.percentage);
+          const purposeId = Number(dist.purposeId);
+          if (!purposeId) {
+            throw new BadRequestException(
+              "Cada distribución requiere un purposeId válido.",
+            );
+          }
 
-          const amountToDistribute =
-            (createIncomeDto.incomeAmount * pPercentage) / 100;
-          totalPercentage += pPercentage;
+          const purpose = await queryRunner.manager.findOne(PurposeEntity, {
+            where: { purposeId },
+          });
 
-          // Crear registro en la tabla intermedia
-          // Nota: Asegúrate de que en IncomeDistributionEntity la relación sea 'purpose'
-          const distribution = queryRunner.manager.create(
-            IncomeDistributionEntity,
-            {
-              income: savedIncome,
-              purpose: { purpose_id: pId } as PurposeEntity, // Usamos la clave correcta: purpose_id
-              amount: amountToDistribute,
-            },
-          );
-          await queryRunner.manager.save(distribution);
+          if (!purpose) {
+            throw new BadRequestException(
+              `Propósito con ID ${purposeId} no existe.`,
+            );
+          }
 
-          // Actualizar saldo del Propósito (Atómico)
-          // CRÍTICO: Usar los nombres de propiedad definidos en PurposeEntity
-          await queryRunner.manager.increment(
-            PurposeEntity,
-            { purpose_id: pId }, // Tu entidad usa purpose_id
-            "purpose_balance", // Tu entidad usa purpose_balance
-            amountToDistribute,
+          if (allocationMode === "percentage") {
+            const percentage = Number(dist.percentage);
+
+            if (!Number.isFinite(percentage) || percentage <= 0) {
+              throw new BadRequestException(
+                `El porcentaje del propósito ${purposeId} es inválido.`,
+              );
+            }
+
+            if (percentage > 100) {
+              throw new BadRequestException(
+                `El porcentaje del propósito ${purposeId} no puede superar 100%.`,
+              );
+            }
+
+            totalAssigned += percentage;
+
+            const amountToDistribute = (totalIncome * percentage) / 100;
+            const distribution = queryRunner.manager.create(
+              IncomeDistributionEntity,
+              {
+                income: savedIncome,
+                incomeId: savedIncome.incomeId,
+                purpose,
+                purposeId: purpose.purposeId,
+                amount: amountToDistribute,
+                percentage,
+              },
+            );
+
+            await queryRunner.manager.save(distribution);
+            await queryRunner.manager.increment(
+              PurposeEntity,
+              { purposeId: purpose.purposeId },
+              "purposeBalance",
+              amountToDistribute,
+            );
+          } else {
+            const fixedAmount = Number(dist.amount);
+
+            if (!Number.isFinite(fixedAmount) || fixedAmount < 0) {
+              throw new BadRequestException(
+                `El monto fijo del propósito ${purposeId} es inválido.`,
+              );
+            }
+
+            totalAssigned += fixedAmount;
+
+            const percentageValue =
+              totalIncome > 0 ? (fixedAmount / totalIncome) * 100 : 0;
+
+            const distribution = queryRunner.manager.create(
+              IncomeDistributionEntity,
+              {
+                income: savedIncome,
+                incomeId: savedIncome.incomeId,
+                purpose,
+                purposeId: purpose.purposeId,
+                amount: fixedAmount,
+                percentage: percentageValue,
+              },
+            );
+
+            await queryRunner.manager.save(distribution);
+            await queryRunner.manager.increment(
+              PurposeEntity,
+              { purposeId: purpose.purposeId },
+              "purposeBalance",
+              fixedAmount,
+            );
+          }
+        }
+
+        if (allocationMode === "percentage" && totalAssigned > 100) {
+          throw new BadRequestException(
+            "La suma de porcentajes asignados no puede superar el 100%.",
           );
         }
 
-        if (totalPercentage > 100) {
-          // Hacemos el rollback manual antes de lanzar la excepción para estar seguros
+        if (allocationMode === "fixed" && totalAssigned > totalIncome) {
           throw new BadRequestException(
-            "El porcentaje total no puede superar el 100%",
+            "La suma de los montos asignados no puede superar el ingreso total.",
           );
         }
       }
 
-      // 4. Actualizar saldo de la cuenta bancaria
       await this.accountService.updateAccountAmount(
         createIncomeDto.accountId,
         createIncomeDto.incomeAmount,
         false,
       );
 
-      // 5. Confirmar Transacción
       await queryRunner.commitTransaction();
+
       return savedIncome;
     } catch (err: unknown) {
-      // Si algo falla, deshacemos todo
       await queryRunner.rollbackTransaction();
-
       if (err instanceof BadRequestException) throw err;
-
       const message = err instanceof Error ? err.message : "Error desconocido";
       throw new BadRequestException(`No se pudo crear el ingreso: ${message}`);
     } finally {
-      // Siempre liberar el queryRunner
       await queryRunner.release();
     }
   }
@@ -247,15 +308,13 @@ export class IncomeService {
     await this.incomeRepository.update(id, updateIncomeDto);
     return this.getById(id);
   }
-
   async removeById(id: number): Promise<void> {
     const queryRunner = this.dataSource.createQueryRunner();
     await queryRunner.connect();
     await queryRunner.startTransaction();
 
     try {
-      // 1. Buscamos el ingreso con sus distribuciones
-      // Importante: El nombre de la relación debe coincidir con tu entidad IncomeEntity
+      // 1. Buscar el ingreso con sus distribuciones
       const income = await queryRunner.manager.findOne(IncomeEntity, {
         where: { incomeId: id },
         relations: ["distributions", "distributions.purpose"],
@@ -265,25 +324,26 @@ export class IncomeService {
         throw new NotFoundException(`El ingreso con ID ${id} no existe.`);
       }
 
-      // 2. Revertir saldos en los Propósitos vinculados
+      // 2. Revertir saldos en los Propósitos
       if (income.distributions && income.distributions.length > 0) {
         for (const dist of income.distributions) {
-          // Accedemos a los campos correctos de tu PurposeEntity
-          // Usamos el ID del propósito que viene en la relación cargada
-          const pId = dist.purpose.purpose_id;
-          const amountToSubtract = Number(dist.amount);
+          if (!dist.purpose || dist.purposeId == null) {
+            continue;
+          }
+
+          const pId = dist.purpose.purposeId;
+          const amountToSubtract = Number(dist.amount ?? 0);
 
           await queryRunner.manager.decrement(
             PurposeEntity,
-            { purpose_id: pId },
-            "purpose_balance", // Nombre exacto en tu PurposeEntity
+            { purposeId: pId },
+            "purposeBalance",
             amountToSubtract,
           );
         }
       }
 
-      // 3. Revertir saldo en la Cuenta bancaria
-      // El tercer parámetro 'true' indica que es una resta (para anular el ingreso)
+      // 3. Revertir saldo en la Cuenta
       await this.accountService.updateAccountAmount(
         income.accountId,
         income.incomeAmount,
@@ -291,26 +351,21 @@ export class IncomeService {
       );
 
       // 4. Eliminar el ingreso
-      // Si en IncomeEntity tienes @OneToMany(..., { cascade: true }),
-      // TypeORM borrará automáticamente las filas en IncomeDistributionEntity.
       await queryRunner.manager.remove(income);
 
       await queryRunner.commitTransaction();
     } catch (err: unknown) {
-      // Revertimos todos los cambios si algo falla
       await queryRunner.rollbackTransaction();
-
       if (err instanceof NotFoundException) throw err;
-
       const message = err instanceof Error ? err.message : "Error desconocido";
       throw new BadRequestException(
         `No se pudo eliminar el ingreso: ${message}`,
       );
     } finally {
-      // Siempre liberamos el queryRunner para evitar fugas de memoria
       await queryRunner.release();
     }
   }
+
   async removeAll() {
     //Obtener todas los Ingresos
     const allIncomes = await this.incomeRepository.find();

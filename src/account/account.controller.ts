@@ -34,12 +34,10 @@ export class AccountController {
   async getTotalAmount(): Promise<number> {
     return this.accountService.calculateTotalAmount();
   }
-
   @Get("total-amount-per-account")
-  async getTotalBalancePerAccount(): Promise<Record<string, number>> {
-    return this.accountService.getBalanceByAccountType();
+  getTotalAmountPerAccount() {
+    return this.accountService.getBalanceByAccount();
   }
-
   @Get(":id")
   async getById(@Param("id") id: number) {
     const account = await this.accountService.getById(id);

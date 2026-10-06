@@ -4,16 +4,16 @@ import { Expense } from "./expense.entity";
 @Entity()
 export class PurposeEntity {
   @PrimaryGeneratedColumn()
-  purpose_id: number;
+  purposeId: number;
 
   @Column({ type: "varchar" })
-  purpose_name: string;
+  purposeName: string;
 
   @Column({ type: "numeric" })
-  purpose_percentage: number;
+  purposePercentage: number;
 
   @Column({ type: "numeric" })
-  purpose_balance: number;
+  purposeBalance: number;
 
   @OneToMany(() => Expense, (expense) => expense.purpose)
   expenses: Expense[];

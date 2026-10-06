@@ -39,7 +39,7 @@ export class Expense {
   account: AccountEntity;
 
   @Column({ name: "purpose_id", nullable: true }) // nullable por si tienes gastos sin propósito
-  purpose_id: number;
+  purposeId: number;
 
   @ManyToOne(() => PurposeEntity)
   @JoinColumn({ name: "purpose_id" })
