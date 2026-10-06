@@ -28,4 +28,4 @@ node_modules/
 dist/
 build/
 out/
-.DS_Store
+.DS_Store.env
