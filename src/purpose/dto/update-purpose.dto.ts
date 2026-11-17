@@ -1,5 +1,11 @@
 import { ApiProperty } from "@nestjs/swagger";
-import { IsNumber, IsPositive, IsString } from "class-validator";
+import {
+  IsIn,
+  IsNumber,
+  IsOptional,
+  IsPositive,
+  IsString,
+} from "class-validator";
 
 export class UpdatePurposeDto {
   @IsString()
@@ -17,6 +23,24 @@ export class UpdatePurposeDto {
     required: false,
   })
   purposePercentage?: number;
+
+  @IsOptional()
+  @IsIn(["percentage", "fixed"])
+  @ApiProperty({
+    example: "percentage",
+    description: "Modo de asignación predeterminada del propósito",
+    required: false,
+  })
+  defaultAllocationType?: "percentage" | "fixed";
+
+  @IsOptional()
+  @IsNumber()
+  @ApiProperty({
+    example: 250,
+    description: "Valor predeterminado para asignar a este propósito",
+    required: false,
+  })
+  defaultAllocationValue?: number;
 
   @IsNumber()
   @IsPositive()

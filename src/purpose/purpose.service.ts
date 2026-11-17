@@ -24,14 +24,25 @@ export class PurposeService {
       throw new BadRequestException("El nombre de Presupuesto es requerido.");
     }
 
+    const purposePercentage = Number(createPurposeDto.purposePercentage);
+
     // 2. Validación de rango individual (0-100)
-    if (createPurposeDto.purposePercentage > 100) {
+    if (!Number.isFinite(purposePercentage) || purposePercentage <= 0) {
       throw new BadRequestException("El porcentaje debe estar entre 0 y 100");
     }
 
+    if (purposePercentage > 100) {
+      throw new BadRequestException("El porcentaje debe estar entre 0 y 100");
+    }
+
+    this.validateDefaultAllocation(
+      createPurposeDto.defaultAllocationType,
+      createPurposeDto.defaultAllocationValue,
+    );
+
     // 3. LLAMADA A LA VALIDACIÓN DE LÍMITE TOTAL (Esto es lo que te faltaba)
     // Verifica que la suma de todos los propósitos no pase de 100
-    await this.validatePercentageLimit(createPurposeDto.purposePercentage);
+    await this.validatePercentageLimit(purposePercentage);
 
     // 4. Verificar duplicados
     const existPurpose = await this.purposeRepository.findOne({
@@ -59,6 +70,11 @@ export class PurposeService {
     if (!existPurpose) {
       throw new BadRequestException("No existe el Presupuesto a actualizar");
     }
+
+    this.validateDefaultAllocation(
+      updatePurposeDto.defaultAllocationType,
+      updatePurposeDto.defaultAllocationValue,
+    );
 
     // Si se está intentando actualizar el porcentaje, validamos el nuevo total
     if (updatePurposeDto.purposePercentage !== undefined) {
@@ -106,7 +122,46 @@ export class PurposeService {
   //Metodo para obtener el total de porcentaje
   async getTotalPercentage(): Promise<number> {
     const purposes = await this.findAll();
-    return purposes.reduce((acc, p) => acc + p.purposePercentage, 0);
+    return purposes.reduce(
+      (acc, p) => acc + Number(p.purposePercentage ?? 0),
+      0,
+    );
+  }
+
+  private validateDefaultAllocation(
+    defaultAllocationType?: "percentage" | "fixed",
+    defaultAllocationValue?: number,
+  ): void {
+    if (
+      defaultAllocationType === undefined &&
+      defaultAllocationValue === undefined
+    ) {
+      return;
+    }
+
+    if (
+      defaultAllocationType === undefined ||
+      defaultAllocationValue === undefined
+    ) {
+      throw new BadRequestException(
+        "Si defines una asignación predeterminada, debes indicar el tipo y el valor.",
+      );
+    }
+
+    if (defaultAllocationValue <= 0) {
+      throw new BadRequestException(
+        "El valor de la asignación predeterminada debe ser mayor que cero.",
+      );
+    }
+
+    if (
+      defaultAllocationType === "percentage" &&
+      defaultAllocationValue > 100
+    ) {
+      throw new BadRequestException(
+        "El porcentaje predeterminado no puede superar el 100%.",
+      );
+    }
   }
 
   private async validatePercentageLimit(
@@ -115,11 +170,13 @@ export class PurposeService {
   ): Promise<void> {
     const purposes = await this.findAll();
     const currentTotal = purposes
-      .filter((p) => p.purposeId !== excludeId) // Excluir el que estamos editando
-      .reduce((acc, p) => acc + p.purposePercentage, 0);
+      .filter((p) => p.purposeId !== excludeId)
+      .reduce((acc, p) => acc + Number(p.purposePercentage ?? 0), 0);
 
-    if (currentTotal + newPercentage > 100) {
-      const available = 100 - currentTotal;
+    const totalAfterInsert = Number(currentTotal) + Number(newPercentage);
+
+    if (totalAfterInsert > 100) {
+      const available = 100 - Number(currentTotal);
       throw new BadRequestException(
         `El porcentaje total excedería el 100%. Solo tienes disponible un ${available}%`,
         {
@@ -162,7 +219,8 @@ export class PurposeService {
     const purposes = await this.findAll();
 
     for (const purpose of purposes) {
-      const amountToAssign = (totalAmount * purpose.purposePercentage) / 100;
+      const percentage = Number(purpose.purposePercentage ?? 0);
+      const amountToAssign = (totalAmount * percentage) / 100;
       await this.updateBalance(purpose.purposeId, amountToAssign);
     }
   }

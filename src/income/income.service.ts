@@ -55,10 +55,16 @@ export class IncomeService {
 
       const savedIncome = await queryRunner.manager.save(newIncome);
 
-      if (createIncomeDto.distributions?.length) {
+      const effectiveDistributions = createIncomeDto.distributions?.length
+        ? createIncomeDto.distributions
+        : createIncomeDto.usePurposeDefaults
+          ? await this.getDefaultPurposeDistributions()
+          : [];
+
+      if (effectiveDistributions.length) {
         let totalAssigned = 0;
 
-        for (const dist of createIncomeDto.distributions) {
+        for (const dist of effectiveDistributions) {
           const purposeId = Number(dist.purposeId);
           if (!purposeId) {
             throw new BadRequestException(
@@ -179,6 +185,26 @@ export class IncomeService {
     } finally {
       await queryRunner.release();
     }
+  }
+
+  private async getDefaultPurposeDistributions(): Promise<
+    Array<{ purposeId: number; percentage?: number; amount?: number }>
+  > {
+    const purposes = await this.purposeService.findAll();
+
+    return purposes
+      .filter(
+        (purpose) =>
+          purpose.defaultAllocationType &&
+          purpose.defaultAllocationValue !== null &&
+          purpose.defaultAllocationValue !== undefined,
+      )
+      .map((purpose) => ({
+        purposeId: purpose.purposeId,
+        ...(purpose.defaultAllocationType === "percentage"
+          ? { percentage: Number(purpose.defaultAllocationValue) }
+          : { amount: Number(purpose.defaultAllocationValue) }),
+      }));
   }
 
   async findAll(filterDto: IncomeFilterDto): Promise<{

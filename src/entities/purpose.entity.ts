@@ -15,6 +15,12 @@ export class PurposeEntity {
   @Column({ type: "numeric" })
   purposeBalance: number;
 
+  @Column({ type: "varchar", nullable: true })
+  defaultAllocationType: "percentage" | "fixed" | null;
+
+  @Column({ type: "numeric", nullable: true })
+  defaultAllocationValue: number | null;
+
   @OneToMany(() => Expense, (expense) => expense.purpose)
   expenses: Expense[];
 }

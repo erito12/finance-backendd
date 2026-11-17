@@ -2,6 +2,7 @@ import { ApiProperty } from "@nestjs/swagger";
 import { IncomeType } from "../interfaces/income.interface";
 import {
   IsArray,
+  IsBoolean,
   IsIn,
   IsNotEmpty,
   IsNumber,
@@ -45,6 +46,16 @@ export class CreateIncomeDto {
     required: false,
   })
   allocationMode?: "percentage" | "fixed";
+
+  @IsOptional()
+  @IsBoolean()
+  @ApiProperty({
+    example: true,
+    description:
+      "Si es true, se usa la asignación predeterminada configurada en cada propósito cuando exista.",
+    required: false,
+  })
+  usePurposeDefaults?: boolean;
 
   @IsOptional()
   @IsArray()
